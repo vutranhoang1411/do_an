@@ -1,0 +1,4 @@
+2023-03-07 16:42:50.212009 Writing 0 to doan.bongden1
+2023-03-07 16:42:58.254435 Writing 1 to doan.bongden1
+2023-03-07 16:43:32.819130 Writing 0 to doan.bongden2
+2023-03-07 16:43:44.429609 Writing 1 to doan.bongden2

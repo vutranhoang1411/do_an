@@ -1,0 +1,5 @@
+*.zip
+requirement.txt
+test_opencv/
+*/__pycache__
+backend/app.env
