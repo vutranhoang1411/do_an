@@ -1,17 +1,17 @@
 import thread6
 from time import sleep
-from hardware_connector import *
+# from hardware_connector import *
 from log import *
 # from random import randint
 from detect_image import *
 
 
 #thread to read from serial
-def receiceSerialMsg():
-    while True:
-        readSerial()
+# def receiceSerialMsg():
+#     while True:
+#         readSerial()
 
-thread6.run_threaded(receiceSerialMsg)
+# thread6.run_threaded(receiceSerialMsg)
 
 # main thread to detect img
 while True:
