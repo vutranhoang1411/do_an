@@ -79,8 +79,9 @@ class AuthUserUserPermissions(models.Model):
 class   Customer(models.Model):
     id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=30)
-    password = models.CharField(max_length=30, blank=True, null=True)
-    email = models.CharField(max_length=40)
+    password = models.CharField(max_length=30, blank=True, null=True, default=123456)
+    email = models.CharField(max_length=40,default='nvkhoan@hcmutc.com')
+    image = models.CharField(max_length=40, default='/images/whatever')
 
 
     class Meta:

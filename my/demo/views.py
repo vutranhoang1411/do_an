@@ -44,6 +44,17 @@ class getCabinet(APIView):
             data.append(cabinet_data)
         return Response(data)
 
+class getOcuppiedCabinet(APIView):
+    def get(self, request):
+        cabinets = Cabinet.objects.filter(aval=False).select_related('customerid')
+        data = []
+        for cabinet in cabinets:
+            cabinet_data={
+                'id':cabinet.id,
+                'path':cabinet.customerid.image,
+            }
+            data.append(cabinet_data)
+        return Response(data)
 
 class FileUploadView(APIView):
     parser_classes = (MultiPartParser, )
