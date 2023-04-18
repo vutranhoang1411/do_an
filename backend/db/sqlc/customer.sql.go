@@ -75,8 +75,8 @@ func (q *Queries) GetCustomerByEmail(ctx context.Context, email string) (Custome
 	return i, err
 }
 
-const updateUserPhoto = `-- name: UpdateUserPhoto :one
-update customer set photo=$1 where email=$2 returning id, name, email, password, photo
+const updateUserPhoto = `-- name: UpdateUserPhoto :exec
+update customer set photo=$1 where email=$2
 `
 
 type UpdateUserPhotoParams struct {
@@ -84,15 +84,7 @@ type UpdateUserPhotoParams struct {
 	Email string         `json:"email"`
 }
 
-func (q *Queries) UpdateUserPhoto(ctx context.Context, arg UpdateUserPhotoParams) (Customer, error) {
-	row := q.db.QueryRowContext(ctx, updateUserPhoto, arg.Photo, arg.Email)
-	var i Customer
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.Email,
-		&i.Password,
-		&i.Photo,
-	)
-	return i, err
+func (q *Queries) UpdateUserPhoto(ctx context.Context, arg UpdateUserPhotoParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserPhoto, arg.Photo, arg.Email)
+	return err
 }

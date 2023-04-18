@@ -22,7 +22,7 @@ type Querier interface {
 	UnrentCabinet(ctx context.Context, id int64) error
 	UpdateCabinetClose(ctx context.Context, id int64) (Cabinet, error)
 	UpdateCabinetOpen(ctx context.Context, id int64) (Cabinet, error)
-	UpdateUserPhoto(ctx context.Context, arg UpdateUserPhotoParams) (Customer, error)
+	UpdateUserPhoto(ctx context.Context, arg UpdateUserPhotoParams) error
 }
 
 var _ Querier = (*Queries)(nil)

@@ -23,7 +23,7 @@ func (maker *PasetoMaker)CreateToken(email string, duration time.Duration)(strin
 	if err!=nil{
 		return "",err
 	}
-	token,err:=maker.paseto.Encrypt(maker.symmetrickey,payload,struct{}{})
+	token,err:=maker.paseto.Encrypt(maker.symmetrickey,payload,nil)
 	if err!=nil{
 		return "",err
 	}

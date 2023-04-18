@@ -3,7 +3,7 @@ CREATE TABLE cabinet
   ID    bigserial  NOT NULL,
   avail   bool NOT NULL DEFAULT true,
   open   bool NOT NULL DEFAULT false,
-  start  timestamp,
+  start  timestamptz,
   userID bigint ,
   PRIMARY KEY (ID)
 );
@@ -14,8 +14,8 @@ CREATE TABLE cabinet_locker_rentals
   ID            bigserial    NOT NULL,
   CabinetID     bigint       NOT NULL,
   CustomerID    bigint       NOT NULL,
-  rentdate      timestamp not null,
-  duration      interval  NOT NULL,
+  rentdate      timestamptz not null,
+  duration      interval second(0)  NOT NULL,
   paymentMethod varchar      NOT NULL,
   fee           decimal   NOT NULL,
   PRIMARY KEY (ID)

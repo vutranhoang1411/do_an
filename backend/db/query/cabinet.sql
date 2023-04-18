@@ -11,10 +11,10 @@ select * from cabinet where avail=true;
 select * from cabinet where userID=$1;
 
 -- name: RentCabinet :exec
-update cabinet set userID=$1, start=NOW() where ID=$2;
+update cabinet set userID=$1, start=NOW(), avail=false where ID=$2;
 
 -- name: UnrentCabinet :exec
-update cabinet set userID=null,start=null where ID=$1;
+update cabinet set userID=null,start=null,avail=true where ID=$1;
 
 -- name: UpdateCabinetOpen :one
 update cabinet set open=true where ID=$1 returning *;

@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	db "github.com/vutranhoang1411/do_an_da_nganh/db/sqlc"
+	"github.com/vutranhoang1411/do_an_da_nganh/util"
 )
 type createUserRequest struct{
 	Name     string `json:"name" form:"name" binding:"required"`
@@ -31,13 +32,13 @@ func (server *Server) createUser(ctx *gin.Context){
 		Email: reqBody.Email,
 		Password: reqBody.Password,
 	}
-	customer,err:=server.model.CreateCustomer(ctx,arg)
+	_,err:=server.model.CreateCustomer(ctx,arg)
 	if err!=nil{
-		ctx.JSON(http.StatusInternalServerError,handleError(err));
+		ctx.JSON(http.StatusBadRequest,handleError(err));
 		return
 	}
 
-	ctx.JSON(http.StatusOK,customer)
+	ctx.JSON(http.StatusOK,map[string]any{})
 }
 type loginUserRequest struct{
 	Email    string `json:"email" form:"email" binding:"required,email"`
@@ -55,12 +56,13 @@ func (server *Server) loginUser(ctx *gin.Context){
 		return
 	}
 	if reqBody.Password!=customer.Password{
-		ctx.JSON(http.StatusForbidden,handleError(fmt.Errorf("Wrong username or password!")))
+		ctx.JSON(http.StatusForbidden,handleError(fmt.Errorf("wrong username or password")))
 		return
 	}
 	token,err:=server.maker.CreateToken(reqBody.Email,server.config.TokenDuration)
 	if err!=nil{
 		ctx.JSON(http.StatusInternalServerError,handleError(err))
+		return
 	}
 	//return some kind of token
 	ctx.JSON(http.StatusOK,map[string]string{
@@ -70,26 +72,39 @@ func (server *Server) loginUser(ctx *gin.Context){
 func (server *Server) userRegisterLocker(ctx *gin.Context){
 	locker_id_param:=ctx.PostForm("locker_id")
 	if len(locker_id_param)<1{
-		ctx.JSON(http.StatusBadRequest,handleError(fmt.Errorf("No locker ID provided")))
+		ctx.JSON(http.StatusBadRequest,handleError(fmt.Errorf("no locker ID provided")))
 		return
 	}
 	lockerID,err:=strconv.ParseInt(locker_id_param,10,64)
 	if err!=nil{
-		ctx.JSON(http.StatusBadRequest,handleError(fmt.Errorf("Invalid locker id")))
+		ctx.JSON(http.StatusBadRequest,handleError(fmt.Errorf("invalid locker ID")))
 		return
 	}
 	user_email:=ctx.GetString("user_info")
+	usr,err:=server.model.GetCustomerByEmail(ctx,user_email)
+	if err!=nil{
+		ctx.JSON(http.StatusBadRequest,handleError(err))
+		return
+	}
+	if !usr.Photo.Valid{
+		ctx.JSON(http.StatusBadRequest,handleError(fmt.Errorf("You must post your avatar before register")))
+		return
+	}
 	err=server.model.RegisterLockerTx(ctx,db.RegisterLockerParam{
 		UserEmail: user_email,
 		LockerID: lockerID,
 	})
 	if err!=nil{
-		ctx.JSON(http.StatusBadRequest,err)
+		ctx.JSON(http.StatusBadRequest,handleError(err))
 		return
 	}
 	ctx.JSON(http.StatusOK,map[string]string{
 		"msg":"Success register locker",
 	})
+}
+type GetLockerResponse struct{
+	ID int64 `json:"id"`
+	Start string `json:"start_time"`
 }
 func (server *Server) getUserLocker(ctx *gin.Context){
 	user_email:=ctx.GetString("user_info")
@@ -106,14 +121,24 @@ func (server *Server) getUserLocker(ctx *gin.Context){
 		ctx.JSON(http.StatusInternalServerError,handleError(err))
 		return
 	}
-	ctx.JSON(http.StatusOK,map[string][]db.Cabinet{
-		"locker_list":locker_list,
-	})
+	res:=[]GetLockerResponse{}
+	for _,locker:=range locker_list{
+		temp:=GetLockerResponse{
+			ID:locker.ID,
+		}
+		if locker.Start.Valid{
+			temp.Start=locker.Start.Time.Format("2006-01-02 15:04:05")
+		}else{
+			temp.Start=""
+		}
+		res=append(res, temp)
+	}
+	ctx.JSON(http.StatusOK,res)
 }
 
 type makePaymentParam struct{
-	lockerID int64 `form:"locker_id" binding:"required"`
-	paymentMethod db.PaymentMethod `form:"method" binding:"required"`
+	LockerID int64 `form:"locker_id" binding:"required"`
+	PaymentMethod string `form:"method" binding:"required"`
 }
 func (server *Server) makePayment(ctx *gin.Context){
 	var req makePaymentParam
@@ -122,27 +147,31 @@ func (server *Server) makePayment(ctx *gin.Context){
 		ctx.JSON(http.StatusBadRequest,handleError(err))
 		return
 	}
+	if req.PaymentMethod!=db.Card&&req.PaymentMethod!=db.Momo&&req.PaymentMethod!=db.Zalo{
+		ctx.JSON(http.StatusBadRequest,handleError(fmt.Errorf("invalid payment method: %s",req.PaymentMethod)))
+		return
+	}
 	user_email:=ctx.GetString("user_info")
 	receipt,err:=server.model.LockerPaymentTx(ctx,db.PaymentTxParam{
 		UserEmail: user_email,
-		LockerId: req.lockerID,
-		Method: req.paymentMethod,
+		LockerId: req.LockerID,
+		Method: req.PaymentMethod,
 	})
 	if err!=nil{
 		ctx.JSON(http.StatusBadRequest,handleError(err))
 		return
 	}
-	ctx.JSON(http.StatusOK,map[string]db.CabinetLockerRental{
-		"receipt":receipt,
-	})
+	ctx.JSON(http.StatusOK,receipt)
 }
-func (server *Server) openLocker(ctx *gin.Context){
+func (server *Server) updateImg(ctx *gin.Context){
+	//get file from post form
+	user_email:=ctx.GetString("user_info")
 	file_header,err:=ctx.FormFile("img")
 	if err!=nil{
 		ctx.JSON(http.StatusBadRequest,handleError(err))
 		return
 	}
-	//init buffer and get the file
+	//init buffer and read the file
 	size:=file_header.Size
 	buffer:=make([]byte,size)
 	file,err:=file_header.Open()
@@ -150,20 +179,46 @@ func (server *Server) openLocker(ctx *gin.Context){
 		ctx.JSON(http.StatusBadRequest,handleError(fmt.Errorf("upload file error")))
 		return
 	}
-	//read img into buffer
 	_,err=file.Read(buffer)
 	if err!=nil{
 		ctx.JSON(http.StatusBadRequest,handleError(fmt.Errorf("upload file error")))
 		return
 	}
-	
-	//write to destination, for testing purpose
-	dest,_:=os.Create("./static/temp/temp.png")
-	_,err=dest.Write(buffer)
+
+	//create file
+	hash_name:=util.GetHashedImg(user_email)+".jpg"
+	err=os.WriteFile("./public/img/"+hash_name,buffer,0644)
 	if err!=nil{
-		ctx.JSON(http.StatusBadRequest,handleError(fmt.Errorf("upload file error")))
+		ctx.JSON(http.StatusBadRequest,handleError(err))
 		return
 	}
-	ctx.JSON(http.StatusOK,struct{}{})
-	
+
+	//update to database
+	err=server.model.UpdateUserPhoto(ctx,db.UpdateUserPhotoParams{
+		Photo: sql.NullString{
+			String: hash_name,
+			Valid: true,
+		},
+		Email: user_email,
+	})
+	if err!=nil{
+		ctx.JSON(http.StatusBadRequest,handleError(err))
+		return
+	}
+	ctx.JSON(http.StatusOK,map[string]string{
+		"msg":"Success",
+	})
+
 }
+
+	
+// 	//write to destination, for testing purpose
+// 	dest,_:=os.Create("./static/temp/temp.png")
+// 	_,err=dest.Write(buffer)
+// 	if err!=nil{
+// 		ctx.JSON(http.StatusBadRequest,handleError(fmt.Errorf("upload file error")))
+// 		return
+// 	}
+// 	ctx.JSON(http.StatusOK,struct{}{})
+	
+// }

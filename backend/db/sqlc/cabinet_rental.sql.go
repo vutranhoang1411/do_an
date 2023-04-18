@@ -12,7 +12,7 @@ import (
 
 const createCabinetRental = `-- name: CreateCabinetRental :one
 insert into cabinet_locker_rentals(       
-    CabinetID ,    
+    CabinetID,    
     CustomerID,   
     rentdate,
     duration,  
@@ -27,9 +27,9 @@ type CreateCabinetRentalParams struct {
 	Cabinetid     int64     `json:"cabinetid"`
 	Customerid    int64     `json:"customerid"`
 	Rentdate      time.Time `json:"rentdate"`
-	Duration      int64     `json:"duration"`
+	Duration      string    `json:"duration"`
 	Paymentmethod string    `json:"paymentmethod"`
-	Fee           string    `json:"fee"`
+	Fee           float64   `json:"fee"`
 }
 
 func (q *Queries) CreateCabinetRental(ctx context.Context, arg CreateCabinetRentalParams) (CabinetLockerRental, error) {

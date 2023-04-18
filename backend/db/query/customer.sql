@@ -16,5 +16,5 @@ insert into customer(
 ) RETURNING *;
 
 
--- name: UpdateUserPhoto :one
-update customer set photo=$1 where email=$2 returning *;
+-- name: UpdateUserPhoto :exec
+update customer set photo=$1 where email=$2;

@@ -111,7 +111,7 @@ func (q *Queries) GetUserCabinet(ctx context.Context, userid sql.NullInt64) ([]C
 }
 
 const rentCabinet = `-- name: RentCabinet :exec
-update cabinet set userID=$1, start=NOW() where ID=$2
+update cabinet set userID=$1, start=NOW(), avail=false where ID=$2
 `
 
 type RentCabinetParams struct {
@@ -125,7 +125,7 @@ func (q *Queries) RentCabinet(ctx context.Context, arg RentCabinetParams) error 
 }
 
 const unrentCabinet = `-- name: UnrentCabinet :exec
-update cabinet set userID=null,start=null where ID=$1
+update cabinet set userID=null,start=null,avail=true where ID=$1
 `
 
 func (q *Queries) UnrentCabinet(ctx context.Context, id int64) error {
