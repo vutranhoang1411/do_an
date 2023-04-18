@@ -1,97 +1,59 @@
-  # TensorFlow is required for Keras to work
-import cv2  # Install opencv-python
+import face_recognition
+import cv2
+import numpy as np
+import simple_lock
+import threading
 from time import sleep
-#class locker help control the amount of http request
-class Lock:
-	def __init__(self) -> None:
-		self.locked=False
-	def free(self):
-		self.locked=False
-	def lock(self):
-		self.locked=True
-global_lock=Lock()
+import base64
 
-		
-def helper(sec):
-    sleep(sec)
-    global_lock.free()  
-# CAMERA can be 0 or 1 based on default camera of your computer
-cap = cv2.VideoCapture(0)
-face_cascade = cv2.CascadeClassifier('./data/haarcascade_frontalface_default.xml')
+def UnlockLock(lock):
+    sleep(30)
+    lock.Unlock()
+class AICam:
+    def __init__(self,client):
+        self.video_capture=cv2.VideoCapture(0)
+        self.client=client
 
-
-# while True:
-#     ret, img = cap.read() 
-#     # convert to gray scale of each frames
-#     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    
-#     #regconize face
-#     img_for_regconize=cv2.resize(img, (224, 224), interpolation=cv2.INTER_AREA)
-#     img_for_regconize = np.asarray(img_for_regconize, dtype=np.float32).reshape(1, 224, 224, 3)
-#     # Normalize the image array
-#     img_for_regconize = (img_for_regconize / 127.5) - 1
-#     # Predicts the model
-#     prediction = model.predict(img_for_regconize)
-#     #prediction=[[percentage of each class in the label file]]
-#     percentage_list=prediction[0]
-#     #index of the best perdicted item in label file
-#     index=np.argmax(percentage_list)
-#     class_name=class_names[index]
-#     confidence_score=percentage_list[index]
-#     # Print prediction and confidence score
-#     has_face=int(class_name[0])
-
-#     if has_face==0:
-#         print("Detect face")
-#         print("Confidence Score:", str(np.round(confidence_score * 100))[:-2], "%")
-#         faces = face_cascade.detectMultiScale(gray, 1.3, 5)
-#         for (x,y,w,h) in faces:
-#         # To draw a rectangle in a face 
-#             roi_color=img[y:y+h,x:x+w]
-#             img_item="my-img.png"
-#             cv2.imwrite(img_item,roi_color)
-#             cv2.rectangle(img,(x,y),(x+w,y+h),(255,0,0),2) 
+    def StartRecord(self):
+        lock=simple_lock.Lock()
+        process_this_frame=True
+        while True:
+            ret, frame = self.video_capture.read()
+            if process_this_frame:
+                small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
+                # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
+                rgb_small_frame = cv2.cvtColor(small_frame,cv2.COLOR_BGR2RGB)
+                # Find all the faces and face encodings in the current frame of video
+                face_locations = face_recognition.face_locations(rgb_small_frame)
+                if len(face_locations)>0:
+                  if lock.Locked==False:
+                        lock.Lock()
+                        threading.Thread(target=UnlockLock,args=(lock,)).start()
+                        img_bytes=cv2.imencode('.jpg',rgb_small_frame)[1].tobytes()
+                        data=base64.b64encode(img_bytes)
+                        self.client.publish("doan.image-detect",data)   
             
-#     # Detects faces of different sizes in the input image
 
-#     # Display an image in a window
-#     cv2.imshow('detect_img',img)
-  
-#     # Wait for Esc key to stop
-#     k = cv2.waitKey(30)
-#     if k == 27:
-#         break
-#     # Grab the webcamera's image.
-#     ret, image = camera.read()
+            process_this_frame = not process_this_frame
+            for (top, right, bottom, left) in face_locations:
+                # Scale back up face locations since the frame we detected in was scaled to 1/4 size
+                top *= 4
+                right *= 4
+                bottom *= 4
+                left *= 4
 
-#     # Resize the raw image into (224-height,224-width) pixels
-#     image = cv2.resize(image, (224, 224), interpolation=cv2.INTER_AREA)
+                # Draw a box around the face
+                cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
 
-#     # Show the image in a window
-#     cv2.imshow("Webcam Image", image)
+                # Draw a label with a name below the face
+                cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
 
-#     # Make the image a numpy array and reshape it to the models input shape.
-#     image = np.asarray(image, dtype=np.float32).reshape(1, 224, 224, 3)
+            # Display the resulting image
+            cv2.imshow('Video', frame)
 
-#     # Normalize the image array
-#     image = (image / 127.5) - 1
+            # Hit 'q' on the keyboard to quit!
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
 
-#     # Predicts the model
-#     prediction = model.predict(image)
-#     index = np.argmax(prediction)
-#     class_name = class_names[index]
-#     confidence_score = prediction[0][index]
-
-#     # Print prediction and confidence score
-#     print("Class:", class_name[2:], end="")
-#     print("Confidence Score:", str(np.round(confidence_score * 100))[:-2], "%")
-
-#     # Listen to the keyboard for presses.
-#     keyboard_input = cv2.waitKey(1)
-
-#     # 27 is the ASCII for the esc key on your keyboard.
-#     if keyboard_input == 27:
-#         break
-
-# camera.release()
-# cv2.destroyAllWindows()
+        self.video_capture.release()
+        cv2.destroyAllWindows()
