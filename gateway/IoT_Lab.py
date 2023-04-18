@@ -1,42 +1,53 @@
-import thread6
 from time import sleep
-# from hardware_connector import *
-from log import *
-# from random import randint
+from hardware_connector import *
 from detect_image import *
+from Adafruit_IO import MQTTClient
+import sys
+import threading
 
+#set up adafruit connect
+
+AIO_USERNAME = "vutranhoang1411"
+AIO_KEY = "aio_fVka33U5AthCsw0KlHzeRqQO0uAE"
+AIO_FEED_IDs = ["doan.open-locker"]
+
+client = MQTTClient(AIO_USERNAME,AIO_KEY)
+
+def on_connect(client):
+    print("Ket noi thanh cong!")
+    for feed in AIO_FEED_IDs:
+        client.subscribe(feed)
+    
+def subscribe(client , userdata , mid , granted_qos):
+    print("Subscribe thanh cong ...")
+
+def disconnected(client):
+    print("Ngat ket noi ...")
+    sys.exit (1)
+
+def message(client , feed_id:str , payload:str):
+    if feed_id=="doan.open-locker":
+        devs=payload.split(",")
+        for dev in devs:
+            sendSerial(dev)
+
+
+client.on_connect = on_connect
+client.on_message = message
+client.on_subscribe = subscribe
+client.on_disconnect=disconnected
+client.connect()
+client.loop_background()
+sleep(5)
 
 #thread to read from serial
-# def receiceSerialMsg():
-#     while True:
-#         readSerial()
+def receiveSerialMsg():
+    while True:
+        readSerial(client)
 
-# thread6.run_threaded(receiceSerialMsg)
+threading.Thread(target=receiveSerialMsg)
 
 # main thread to detect img
-while True:
-    ret,frame=cap.read()
-    faces=face_cascade.detectMultiScale(cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY))
-
-    for (x,y,w,h) in faces:
-        roi_color=frame[y:y+h,x:x+w]
-        img_item="my-img.png"
-
-        if global_lock.locked==False:
-            #lock to prevent to many http request to sv
-            global_lock.lock()
-            thread6.run_threaded(helper,2)
-			#demo send htpp
-            cv2.imwrite(img_item,roi_color)
-            
-
-        cv2.rectangle(frame,(x,y),(x+w,y+h),(255,255,0),2) 
-        
-    
-    cv2.imshow("frame",frame)
-    key=cv2.waitKey(20)
-    if key==27:
-        break
 
 
     

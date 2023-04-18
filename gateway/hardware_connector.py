@@ -25,15 +25,33 @@ import serial.tools.list_ports
 ser = serial.Serial(port="/dev/pts/3", baudrate=115200)
 mess = ""
 
-def processData(data):
-    #decode the data
+def preProcessData(data:str)->str:
+    start=-1
+    for c in range(len(data)):
+        if data[c]=='!':
+            start=c
+    data=data[start:]
     data = data.replace("!", "")
     data = data.replace("#", "")
-    splitData = data.split(":")
-    #do something with the data
-    #call http update
+    return data
 
-def readSerial():
+def processData(client,data):
+    #decode the data
+    data=preProcessData(data)
+
+    #data format:   <dev id>:<0/1>
+    splitData = data.split(":")
+    dev_id=splitData[0]
+    payload=splitData[1]
+
+    if dev_id=="0":
+        client.publish("doan.locker1",payload)
+    elif dev_id=="1":
+        client.publish("doan.locker2",payload)
+    elif dev_id=="2":
+        client.publish("doan.locker3",payload)
+
+def readSerial(client):
     bytesToRead = ser.inWaiting()
     if (bytesToRead > 0):
         global mess
@@ -41,15 +59,13 @@ def readSerial():
         while ("#" in mess) and ("!" in mess):
             start = mess.find("!")
             end = mess.find("#")
-            processData(mess[start:end + 1])
+            processData(client,mess[start:end + 1])
             if (end == len(mess)):
                 mess = ""
             else:
                 mess = mess[end+1:]
             #have to add error checking
 
-def createSerialMessage(pac_id:int,dev_id:int,data:str)->str:
-    return f"!{pac_id}:{dev_id}:{data}#"
 
 def sendSerial(data):
     ser.write(str(data).encode("utf-8"))
