@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
+	"math"
 )
 
 type Model interface{
@@ -24,18 +25,19 @@ func NewModel(db *sql.DB)Model{
 		db:db,
 	}
 }
-func (model *SQLModel)execTx(ctx context.Context,fn func (q *Queries,txCtx context.Context)error)error{
+func (model *SQLModel)execTx(ctx context.Context,fn func (q *Queries)error)error{
 	tx,err:=model.db.BeginTx(ctx,nil)
 	if err!=nil{
 		return err
 	}
 	q:=New(tx)
-	err=fn(q,ctx)
+	err=fn(q)
 	if err!=nil{
-		if rbErr:=tx.Rollback();rbErr!=nil{
-			return fmt.Errorf("Transaction Err:%s, Rollback Err:%s",err.Error(),rbErr.Error())
+		rbErr:=tx.Rollback()
+		if rbErr!=nil{
+			return fmt.Errorf("Transaction Err: %s, Rollback Err: %s",err.Error(),rbErr.Error())
 		}
-		return err
+		return fmt.Errorf("Transaction error: %s",err.Error())
 	}
 	return tx.Commit()
 }
@@ -44,20 +46,23 @@ type RegisterLockerParam struct{
 	LockerID int64
 }
 func (model *SQLModel)RegisterLockerTx(ctx context.Context,param RegisterLockerParam)error{
-	err:=model.execTx(ctx,func(q *Queries,txCtx context.Context) error {
-		usr,err:=model.GetCustomerByEmail(txCtx,param.UserEmail)
+	err:=model.execTx(ctx,func(q *Queries) error {
+		usr,err:=q.GetCustomerByEmail(ctx,param.UserEmail)
 		if err!=nil{
 			return err
 		}
-		locker,err:=model.GetCabinetForRent(txCtx,param.LockerID)
+		locker,err:=q.GetCabinetForRent(ctx,param.LockerID)
 		if err!=nil{
 			return err
 		}
 		if locker.Avail==false{
+			if locker.Userid.Int64==usr.ID{
+				return fmt.Errorf("You have registered this locker")
+			}
 			return fmt.Errorf("The locker has been registered, please choose another one")
 		}
 		
-		err=model.RentCabinet(txCtx,RentCabinetParams{
+		err=q.RentCabinet(ctx,RentCabinetParams{
 			Userid: sql.NullInt64{
 				Int64: usr.ID,
 				Valid: true,
@@ -68,29 +73,30 @@ func (model *SQLModel)RegisterLockerTx(ctx context.Context,param RegisterLockerP
 	})
 	return err
 }
-type PaymentMethod string
+
 const(
-	Card PaymentMethod = "card"
-	Momo PaymentMethod = "momo"
-	Zalo PaymentMethod = "zalopay"
+	Card string = "card"
+	Momo string = "momo"
+	Zalo string = "zalopay"
 )
 type PaymentTxParam struct{
 	UserEmail string
 	LockerId int64
-	Method PaymentMethod
+	Method string
 }
 
 func (model *SQLModel)LockerPaymentTx(ctx context.Context, param PaymentTxParam)(CabinetLockerRental,error){
+	// var receipt CabinetLockerRental
 	var receipt CabinetLockerRental
-	err:=model.execTx(ctx,func(q *Queries, txCtx context.Context) error {
+	err:=model.execTx(ctx,func(q *Queries) error {
 		//get user
-		usr,err:=model.GetCustomerByEmail(txCtx,param.UserEmail)
+		usr,err:=q.GetCustomerByEmail(ctx,param.UserEmail)
 		if err!=nil{
 			return err
 		}
 		
 		//check if locker rent by user
-		locker,err:=model.GetCabinetByID(txCtx,param.LockerId)
+		locker,err:=q.GetCabinetByID(ctx,param.LockerId)
 		if err!=nil{
 			return err
 		}
@@ -99,18 +105,22 @@ func (model *SQLModel)LockerPaymentTx(ctx context.Context, param PaymentTxParam)
 		}
 
 		//unrent locker
-		err=model.UnrentCabinet(ctx,param.LockerId)
+		
+
+		err=q.UnrentCabinet(ctx,param.LockerId)
 		if err!=nil{
 			return err
 		}
+
+
 		//create receipt
-		receipt,err=model.CreateCabinetRental(ctx,CreateCabinetRentalParams{
+		receipt,err=q.CreateCabinetRental(ctx,CreateCabinetRentalParams{
 			Cabinetid: param.LockerId,
 			Customerid: usr.ID,
 			Rentdate: locker.Start.Time,
-			Duration: int64(time.Since(locker.Start.Time)),
+			Duration: fmt.Sprint(math.Ceil(time.Since(locker.Start.Time).Seconds())),
 			Paymentmethod: string(param.Method),
-			Fee:"teting fee amount",
+			Fee:float64(15000*int64(math.Ceil(time.Since(locker.Start.Time).Hours()))),
 		})
 		return err
 	})

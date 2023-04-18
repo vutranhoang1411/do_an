@@ -13,11 +13,15 @@ var (
 func (server *Server)userAuthorization(ctx *gin.Context){
 	authorization:=ctx.GetHeader("authorization")
 	if len(authorization)==0{
-		ctx.JSON(http.StatusUnauthorized,handleError(fmt.Errorf("No token provided")))
+		ctx.JSON(http.StatusUnauthorized,handleError(fmt.Errorf("no token provided")))
+		ctx.Abort()
+		return
 	}
 	payload,err:=server.maker.VerifyToken(authorization)
 	if err!=nil{
 		ctx.JSON(http.StatusUnauthorized,handleError(err))
+		ctx.Abort()
+		return
 	}
-	ctx.Set("user_info",payload)
+	ctx.Set("user_info",payload.Email)
 }

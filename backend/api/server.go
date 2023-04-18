@@ -23,11 +23,17 @@ func NewServer(conn *sql.DB,config util.Config)*Server{
 	server.maker=token.NewPasetoMaker(config.TokenKey)
 	server.router=gin.Default()
 	
+	
 	///add route
-	server.router.POST("/img",server.openLocker)
-	server.router.POST("/user/create",server.createUser)
-	server.router.POST("/user/login",server.loginUser)
+	server.router.POST("/api/create",server.createUser)
+	server.router.POST("/api/login",server.loginUser)
+	server.router.GET("/api/locker",server.getFreeLocker)
 
+	authen_route:=server.router.Group("/api/user").Use(server.userAuthorization)
+	authen_route.POST("/locker",server.userRegisterLocker)
+	authen_route.GET("/locker",server.getUserLocker)
+	authen_route.POST("/img",server.updateImg)
+	authen_route.POST("/payment",server.makePayment)
 	
 	return server
 }
