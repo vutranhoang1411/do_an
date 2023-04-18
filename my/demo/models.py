@@ -2,8 +2,8 @@
 # You'll have to do the following manually to clean this up:
 #   * Rearrange models' order
 #   * Make sure each model has one field with primary_key=True
-#   * Make sure each ForeignKey and OneToOneField has `on_delete` set to the desired behavior
-#   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
+#   * Make sure each ForeignKey and OneToOneField has on_delete set to the desired behavior
+#   * Remove managed = False lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
 
@@ -76,17 +76,26 @@ class AuthUserUserPermissions(models.Model):
         db_table = 'auth_user_user_permissions'
         unique_together = (('user', 'permission'),)
 
+class   Customer(models.Model):
+    id = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=30)
+    password = models.CharField(max_length=30, blank=True, null=True)
+    email = models.CharField(max_length=40)
 
+
+    class Meta:
+        db_table='customer'
+        
 class Cabinet(models.Model):
     id = models.IntegerField(primary_key=True)
     coord = models.TextField()  # This field type is a guess.
     aval = models.BooleanField()
     open = models.BooleanField()
-    start = models.TimeField(blank=True, null=True)
-    userid = models.ForeignKey('Customer', models.DO_NOTHING, db_column='userid', blank=True, null=True)
+    start = models.DateTimeField(blank=True, null=True)
+    customerid = models.ForeignKey('Customer', models.CASCADE, db_column='customerid', blank=True, null=True)
 
     class Meta:
-        managed = False
+        app_label='demo'
         db_table = 'cabinet'
 
 
@@ -100,18 +109,9 @@ class CabinetLockerRentals(models.Model):
     fee = models.DecimalField(max_digits=15, decimal_places=2)
 
     class Meta:
-        managed = False
         db_table = 'cabinet_locker_rentals'
 
 
-class   Customer(models.Model):
-    id = models.IntegerField(primary_key=True)
-    name = models.CharField(max_length=30)
-    credentials = models.CharField(max_length=100, blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'customer'
 
 
 class DjangoAdminLog(models.Model):

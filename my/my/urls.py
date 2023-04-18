@@ -15,10 +15,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from demo.views import getAll,getNumOfUsedCabinet,FileUploadView
+from demo.views import getAll,getNumOfUsedCabinet,FileUploadView,getCabinet
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('rentals/',getAll.as_view()),
     path('count/',getNumOfUsedCabinet.as_view()),
-    path('image/',FileUploadView.as_view())
+    path('image/',FileUploadView.as_view()),
+    path('cabin/',getCabinet.as_view())
 ]

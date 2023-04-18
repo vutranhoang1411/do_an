@@ -24,7 +24,7 @@ class CabinetLockerRentalsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CabinetLockerRentals
-        fields = ['id', 'rentdate', 'fee', 'customer_name']
+        fields = ['id', 'rentdate', 'fee', 'customerid', 'customer_name']
 
     def get_customer_name(self, obj):
         return obj.customerid.name

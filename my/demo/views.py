@@ -12,13 +12,37 @@ import numpy as np
 
 class getAll(APIView):
     def get (self, request):
-        list=CabinetLockerRentals.objects.all().select_related('customerid')
-        mydata=CabinetLockerRentalsSerializer(list, many=True)
-        return Response(data=mydata.data,status=status.HTTP_200_OK)
+        rentals=CabinetLockerRentals.objects.order_by('-id').select_related('customerid')[:10]
+        data=[]
+        for record in rentals:
+            record_data={
+                'id':record.id,
+                'customer_name':record.customerid.name,
+                'rentdate':record.rentdate.strftime('%Y-%m-%d %H:%M:%S'),
+                'fee':record.fee ,              
+            }
+            data.append(record_data)
+
+        return Response(data)
 class getNumOfUsedCabinet(APIView):
     def get(self, request):
         count=Cabinet.objects.filter(aval=False).count()
         return Response({'count':count})
+class getCabinet(APIView):
+    def get(self, request):
+        cabinets = Cabinet.objects.order_by('aval','id').select_related('customerid')
+        data = []
+        for cabinet in cabinets:
+            position = f"Row   {cabinet.coord['y']+1} Column   {cabinet.coord['x']+1}"
+            cabinet_data = {
+                'id': cabinet.id,
+                'position': position,
+                'customer': None if cabinet.customerid is None else cabinet.customerid.name,
+                'occupied':  not cabinet.aval,
+                # Add any other fields you want to include in the response
+            }
+            data.append(cabinet_data)
+        return Response(data)
 
 
 class FileUploadView(APIView):
