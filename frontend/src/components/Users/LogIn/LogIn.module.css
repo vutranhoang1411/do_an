@@ -1,0 +1,215 @@
+.container {
+	display: flex;
+	position: fixed;
+	margin: auto auto;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	width: 60%;
+	height: 80%;
+	z-index: 10;
+}
+.container button {
+	margin-top: 10px;
+	display: block;
+}
+
+/* Left side */
+.left_side {
+	background: linear-gradient(to bottom right, #2c73eb, #17cf97);
+	width: 50%;
+}
+.logo {
+	width: 73px;
+	height: 36px;
+	margin: 20px 30px;
+
+	font-family: 'Inter';
+	font-style: normal;
+	font-weight: 700;
+	font-size: 30px;
+	line-height: 36px;
+	align-items: center;
+
+	color: #ffffff;
+}
+.logIn {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: calc(100% - 56px);
+	font-size: 30px;
+	color: white;
+	font-weight: 600;
+}
+.logIn .btn-outline {
+	height: 20px;
+}
+/* Right side */
+.right_side {
+	background-color: white;
+	width: 50%;
+	position: relative;
+}
+/* Back Button */
+.ico_back {
+	right: 20px;
+	margin-top: 15px;
+	cursor: pointer;
+	color: #8692a6;
+	font-weight: 600;
+	font-size: 16px;
+	/* line-height: 19px; */
+	height: 16px;
+	position: absolute;
+}
+.btn_back {
+	display: none !important;
+}
+.title {
+	width: 235px;
+	height: 36px;
+	margin-left: 60px;
+	margin-top: 15px;
+
+	font-family: 'Inter';
+	font-style: normal;
+	font-weight: 700;
+	font-size: 30px;
+	line-height: 36px;
+
+	color: #000000;
+}
+.describe {
+	width: 400px;
+	margin-left: 60px;
+	margin-top: 10px;
+
+	font-family: 'Inter';
+	font-style: normal;
+	font-weight: 400;
+	font-size: 14px;
+	line-height: 28px;
+
+	color: #8692a6;
+}
+.input {
+	margin-left: 60px;
+	margin-top: 15px;
+
+}
+.input label {
+	height: 19px;
+	margin-top: 14px;
+	font-family: 'Inter';
+	font-style: normal;
+	font-weight: 500;
+	font-size: 16px;
+	line-height: 19px;
+	display: flex;
+	align-items: center;
+
+	color: #696f79;
+}
+.input input {
+	height: 40px;
+	font-size: 16px;
+	width: 80%;
+	padding: 0 8px;
+	margin: 8px 0;
+	box-sizing: border-box;
+	border: none;
+	border-bottom: 2px solid #17cf97;
+}
+.input input:focus {
+	border-radius: 6px;
+	border: 1px solid red !important;
+}
+.error {
+	background-color: #faffbd;
+}
+.goLogIn {
+	font-size: 14px;
+	display: none;
+}
+.goLogIn span {
+	color: #1a73e8;
+	font-weight: bold;
+	cursor: pointer;
+}
+.errMsg {
+	font-size: 13px;
+	color: red;
+	font-weight: 600;
+	margin: 5px 0px;
+}
+.popup {
+	z-index: 10 !important;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	min-width: 300px;
+}
+.content {
+	text-align: center;
+}
+/* responsive */
+@media screen and (max-width: 1248px) {
+	.input input {
+		width: 250px;
+	}
+}
+@media screen and (max-width: 1080px) {
+	.input input {
+		width: 200px;
+	}
+	.ico-back {
+		right: 5px;
+		margin-left: 10;
+	}
+}
+@media screen and (max-width: 1024px) {
+	.left_side {
+		display: none;
+	}
+	.right_side {
+		width: 100%;
+		padding: 10px;
+	}
+	.title {
+		margin-left: 0px;
+	}
+	.describe {
+		margin-left: 0px;
+	}
+	.container {
+		width: 30%;
+		margin: auto auto;
+	}
+	.input {
+		margin: auto 0 !important;
+	}
+	.goLogIn {
+		display: block;
+	}
+	.ico_back {
+		display: none;
+	}
+	.btn_back {
+		display: inline !important;
+	}
+	.btn_logIn {
+		display: inline !important;
+		margin-left: 10px;
+	}
+}
+@media screen and (max-width: 768px) {
+	.container {
+		width: 40%;
+		margin: auto auto;
+	}
+}
