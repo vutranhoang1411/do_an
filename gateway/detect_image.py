@@ -29,7 +29,7 @@ class AICam:
                   if lock.Locked==False:
                         lock.Lock()
                         threading.Thread(target=UnlockLock,args=(lock,)).start()
-                        img_bytes=cv2.imencode('.jpg',rgb_small_frame)[1].tobytes()
+                        img_bytes=cv2.imencode('.jpg',small_frame)[1].tobytes()
                         data=base64.b64encode(img_bytes)
                         self.client.publish("doan.image-detect",data)   
             
