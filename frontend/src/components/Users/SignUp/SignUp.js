@@ -15,7 +15,7 @@ const SignUp = (props) => {
 	const signUpHandler = async (e) => {
 		e.preventDefault();
 		console.log(name.current.value);
-		fetch(`${window.url}/api/user/create`, {
+		fetch(`${window.url}/api/create`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',

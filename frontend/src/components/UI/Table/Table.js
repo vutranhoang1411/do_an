@@ -27,7 +27,7 @@ const Table = (props) => {
 					<tr key={index}>
 						{props.columns.map((col) => {
 							if (col.field !== 'action') {
-								return <td key={row[col.field]}>{row[col.field]}</td>;
+								return <td key={row[col.field]}>{row[col.field].toString()}</td>;
 							} else {
 								return (
 									<td key='button' className={classes.rightFormat} >

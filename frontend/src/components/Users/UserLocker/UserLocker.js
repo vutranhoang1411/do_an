@@ -32,7 +32,7 @@ const UserLocker = () => {
 		})
 			.then((response) => response.json())
 			.then((data) => {
-				setItems(data.body);
+				setItems(data);
 			})
 			.catch((error) => console.error(error));
 	}, [token]);
@@ -67,8 +67,8 @@ const UserLocker = () => {
 			})
 			.then((data) => {
 				setMessageTitle('Thành công');
-				console.log(data.body);
-				const msgSuccessPayment = data.body;
+				console.log(data);
+				const msgSuccessPayment = data;
 				setMessageContent(
 					<Wrapper>
 						<i className='material-symbols-outlined'>check_circle</i>

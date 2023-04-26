@@ -14,7 +14,7 @@ const LogIn = (props) => {
 
 	const logInHandler = async (e) => {
 		e.preventDefault();
-		fetch(`${window.url}/api/user/login`, {
+		fetch(`${window.url}/api/login`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',

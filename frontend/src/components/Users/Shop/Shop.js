@@ -26,7 +26,8 @@ const Shop = () => {
 		})
 			.then((response) => response.json())
 			.then((data) => {
-				setItems(data.body);
+				console.log('hi',(data));
+				setItems(data);
 			})
 			.catch((error) => console.error(error));
 	}, [token]);
@@ -41,7 +42,7 @@ const Shop = () => {
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({
-				locker_id: ID,
+				'locker_id': ID,
 			}),
 		})
 			.then((response) => {
@@ -74,6 +75,8 @@ const Shop = () => {
 	const columns = [
 		{ field: 'id', header: 'ID' },
 		{ field: 'avail', header: 'Trạng thái tủ' },
+		{ field: 'open', header: 'Trạng thái' },
+
 		{ field: 'action', header: 'Action', content: 'Đăng ký' },
 	];
 	return (
