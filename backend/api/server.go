@@ -22,7 +22,7 @@ func NewServer(conn *sql.DB,config util.Config)*Server{
 	server.config=config
 	server.maker=token.NewPasetoMaker(config.TokenKey)
 	server.router=gin.Default()
-	
+	server.router.Use(CORSMiddleware())
 	
 	///add route
 	server.router.POST("/api/create",server.createUser)

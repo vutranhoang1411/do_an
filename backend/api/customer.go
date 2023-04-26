@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	db "github.com/vutranhoang1411/do_an_da_nganh/db/sqlc"
@@ -69,15 +68,14 @@ func (server *Server) loginUser(ctx *gin.Context){
 		"token":token,
 	})
 }
+type userRegisterLockerRequest struct{
+	LockerID int64 `json:"locker_id"`
+}
 func (server *Server) userRegisterLocker(ctx *gin.Context){
-	locker_id_param:=ctx.PostForm("locker_id")
-	if len(locker_id_param)<1{
-		ctx.JSON(http.StatusBadRequest,handleError(fmt.Errorf("no locker ID provided")))
-		return
-	}
-	lockerID,err:=strconv.ParseInt(locker_id_param,10,64)
+	var req userRegisterLockerRequest
+	err:=ctx.ShouldBindJSON(&req)
 	if err!=nil{
-		ctx.JSON(http.StatusBadRequest,handleError(fmt.Errorf("invalid locker ID")))
+		ctx.JSON(http.StatusBadRequest,handleError(fmt.Errorf("no locker ID provided")))
 		return
 	}
 	user_email:=ctx.GetString("user_info")
@@ -92,7 +90,7 @@ func (server *Server) userRegisterLocker(ctx *gin.Context){
 	}
 	err=server.model.RegisterLockerTx(ctx,db.RegisterLockerParam{
 		UserEmail: user_email,
-		LockerID: lockerID,
+		LockerID: req.LockerID,
 	})
 	if err!=nil{
 		ctx.JSON(http.StatusBadRequest,handleError(err))
@@ -105,6 +103,7 @@ func (server *Server) userRegisterLocker(ctx *gin.Context){
 type GetLockerResponse struct{
 	ID int64 `json:"id"`
 	Start string `json:"start_time"`
+	Open bool `json:"open"`
 }
 func (server *Server) getUserLocker(ctx *gin.Context){
 	user_email:=ctx.GetString("user_info")
@@ -125,6 +124,7 @@ func (server *Server) getUserLocker(ctx *gin.Context){
 	for _,locker:=range locker_list{
 		temp:=GetLockerResponse{
 			ID:locker.ID,
+			Open: locker.Open,
 		}
 		if locker.Start.Valid{
 			temp.Start=locker.Start.Time.Format("2006-01-02 15:04:05")
@@ -137,8 +137,8 @@ func (server *Server) getUserLocker(ctx *gin.Context){
 }
 
 type makePaymentParam struct{
-	LockerID int64 `form:"locker_id" binding:"required"`
-	PaymentMethod string `form:"method" binding:"required"`
+	LockerID int64 `json:"locker_id" form:"locker_id" binding:"required"`
+	PaymentMethod string `json:"method" form:"method"`
 }
 func (server *Server) makePayment(ctx *gin.Context){
 	var req makePaymentParam
