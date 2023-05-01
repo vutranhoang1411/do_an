@@ -8,7 +8,7 @@ import threading
 #set up adafruit connect
 
 AIO_USERNAME = "vutranhoang1411"
-AIO_KEY = "aio_fVka33U5AthCsw0KlHzeRqQO0uAE"
+AIO_KEY = ""
 AIO_FEED_IDs = ["doan.open-locker"]
 
 client = MQTTClient(AIO_USERNAME,AIO_KEY)
@@ -26,10 +26,11 @@ def disconnected(client):
     sys.exit (1)
 
 def message(client , feed_id:str , payload:str):
-    if feed_id=="doan.open-locker":
-        devs=payload.split(",")
-        for dev in devs:
-            sendSerial(dev)
+    pass
+    # if feed_id=="doan.open-locker":
+    #     devs=payload.split(",")
+    #     for dev in devs:
+    #         sendSerial(dev)
 
 
 client.on_connect = on_connect
@@ -49,6 +50,8 @@ threading.Thread(target=receiveSerialMsg)
 
 # main thread to detect img
 
+cam=AICam(client)
+cam.StartRecord()
 
     
 
