@@ -9,6 +9,11 @@ from .models import CabinetLockerRentals, Cabinet
 import face_recognition
 from os import listdir
 import numpy as np
+from datetime import date, timedelta
+from django.db.models import Sum
+from django.db.models.functions import ExtractWeekDay
+
+
 
 class getAll(APIView):
     def get (self, request):
@@ -94,3 +99,18 @@ class FileUploadView(APIView):
         return Response(up_file.name, status.HTTP_201_CREATED)
 
 
+class CabinetLockerRevenueView(APIView):
+    def get(self, request, format=None):
+        today = date.today()
+        end_date = today  # get last Sunday
+        start_date = end_date - timedelta(days=6)  # get last 7 days
+        data = []
+        for i in reversed(range(7)):
+            weekday = (end_date - timedelta(days=i)).strftime('%A')
+            revenue = CabinetLockerRentals.objects.filter(
+                rentdate__date=end_date - timedelta(days=i)
+            ).aggregate(Sum('fee'))['fee__sum'] or 0.0
+            
+            data.append({'x': weekday, 'y': float(revenue)})
+            
+        return Response(data)

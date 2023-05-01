@@ -101,7 +101,7 @@ class Cabinet(models.Model):
 
 
 class CabinetLockerRentals(models.Model):
-    id = models.IntegerField(primary_key=True)
+    id = models.BigAutoField(primary_key=True)
     cabinetid = models.ForeignKey(Cabinet, on_delete=models.CASCADE, db_column='cabinetid')
     customerid = models.ForeignKey('Customer', on_delete=models.CASCADE, db_column='customerid')
     rentdate = models.DateTimeField(blank=True, null=True)
