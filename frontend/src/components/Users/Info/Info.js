@@ -1,54 +1,170 @@
+import React, { useState, useEffect, useContext } from 'react';
+import axios from 'axios';
+
 import SideBar from '../../UI/SideBar/SideBar';
 import Button from '../../UI/Button/Button';
+import Wrapper from '../../Helpers/Wrapper';
+import Card from '../../UI/Card/Card';
+
+import { authContext } from '../../../context/authContext';
 
 import classes from './Info.module.css';
 
-const Info = (props) => {
+const Info = () => {
+
+	const { token } = useContext(authContext);
+	const [data, setData] = useState(null);
+	const [image, setImage] = useState('');
+
+	const [showPassword, setShowPassword] = useState(false);
+	const [showUpdateImg, setShowUpdateImg] = useState(false);
+
+	const [isMsg, setIsMsg] = useState(false);
+	const [messageTitle, setMessageTitle] = useState(null);
+	const [messageContent, setMessageContent] = useState(null);
+	const [error, setError] = useState(false);
+
+	const togglePasswordVisibility = () => {
+		setShowPassword(!showPassword);
+	};
+	const toggleUpdateImg = () => {
+		setShowUpdateImg(!showUpdateImg);
+	};
+	const handleCard = () => {
+		window.location.reload();
+	};
+	const handleImage = (e) => {
+		console.log(e.target.files);
+		setImage(e.target.files[0]);
+	};
+	const closeUpdateImg = () => {
+		setShowUpdateImg(false);
+	}
+	// Update image
+	const config = {
+		headers: {
+			authorization: `${token}`,
+			'Content-Type': 'application/json',
+		},
+	};
+
+	const handleAPI = () => {
+		const formData = new FormData();
+		formData.append('image', image);
+		axios
+			.post(`${window.url}/api/user/img`, config, formData)
+			.then((response) => {
+				if(response.status === 200) {
+					setIsMsg(true);
+					setShowUpdateImg(false);
+					setMessageTitle('Thành công');
+					setMessageContent('Bạn đã cập nhật ảnh thành công!!!');
+				}else {
+					return response.text().then((text) => {
+						throw new Error(text);
+					});
+				}
+			})
+			.catch((err) => {
+				setIsMsg(true);
+				setShowUpdateImg(false);
+				const errorMessage = err.response.data.error;
+				setMessageTitle('Lỗi !!!');
+				setError(true);
+				setMessageContent(errorMessage);
+			});
+	};
+	useEffect(() => {
+		fetch(`${window.url}/api/user`, {
+			method: 'GET',
+			headers: {
+				authorization: `${token}`,
+				'Content-Type': 'application/json',
+			},
+		})
+			.then((response) => response.json())
+			.then((dataJson) => {
+				sessionStorage.setItem('name', dataJson.name);
+
+				setData(dataJson);
+			})
+			.catch((error) => console.error(error));
+	}, );
+
 	return (
-		<SideBar currentIndex={1}>
-			<div className={classes.content}>
-				<div className={classes.left_content}>
-					<div className={classes.title}> Thông tin cá nhân </div>
-					<form className={classes.input}>
-						<label htmlFor='username'>Họ và Tên</label>
-						<input id='username' type='text' value={'Nhật Thiên'} />
+		<Wrapper>
+			{isMsg && (
+				<Card
+					className={`${classes.popup} ${error ? 'error' : 'success'}`}
+					handleCard={handleCard}
+					title={messageTitle}
+				>
+					<div className={classes.content}>
+						{error ? (
+							<i className='material-symbols-outlined'>error</i>
+						) : (
+							<i className='material-symbols-outlined'>check_circle</i>
+						)}
 
-						<label htmlFor='age'>Địa chỉ email</label>
-						<input id='age' type='email' value={'thien@gmail.com'} />
-
-						<label htmlFor='phone'>Số điện thoại</label>
-						<input id='phone' type='tel' value={'0123'} />
-
-						<label htmlFor='gender'>Giới tính</label>
-						<input id='gender' type='text' />
-
-						<label htmlFor='password'>Mật khẩu</label>
-						<input id='password' type='password' value={'0123'} />
-
-						<Button className='btn' type='submit'>
-							Cập nhật
-						</Button>
-					</form>
-				</div>
-				<div className={classes.right_content}>
-						<div className={classes.title}> Thông tin ngân hàng </div>
-						<form className={classes.input}>
-							<label htmlFor='bank'>Ngân hàng</label>
-							<input id='bank' type='text' value={'Nhật Thiên'} />
-
-							<label htmlFor='name'>Tên tài khoản</label>
-							<input id='name' type='text' value={'thien@gmail.com'} />
-
-							<label htmlFor='num'>Số tài khoản</label>
-							<input id='num' type='tel' value={'0123'} />
-
-							<Button className='btn' type='submit'>
-								Thêm tài khoản
-							</Button>
-						</form>
+						<div>{messageContent}</div>
 					</div>
-			</div>
-		</SideBar>
+				</Card>
+			)}
+			{showUpdateImg && (
+				<Card
+					className={classes.updateImg}
+					title={'Update Image'}
+					disappearButton={true}
+				>
+					<div>
+						<input type='file' name='file' onChange={handleImage} />
+						<Button
+							className={`${'btn red'} ${classes.btnUpdateImg}`}
+							onClick={closeUpdateImg}
+						>
+							Close
+						</Button>
+						<Button
+							className={`${'btn gre'} ${classes.btnUpdateImg}`}
+							onClick={handleAPI}
+						>
+							Submit
+						</Button>
+					</div>
+				</Card>
+			)}
+
+			{(isMsg || showUpdateImg) && <div className={classes.overlay} />}
+			<SideBar currentIndex={0}>
+				{data && (
+					<div className={classes.container}>
+						<div className={classes.title}> Thông tin cá nhân </div>
+						<div className={classes.image}>
+							<img src='img/avt.jpg' alt='profile' />
+							<div className={classes.update} onClick={toggleUpdateImg}>
+								Upload ảnh
+							</div>
+						</div>
+
+						<div className={classes.input}>
+							<label htmlFor='username'>Họ và Tên</label>
+							<input id='username' type='text' value={data.name} />
+							<label htmlFor='age'>Địa chỉ email</label>
+							<input id='age' type='email' value={data.email} />
+							<label htmlFor='password'>Mật khẩu</label>
+							<input
+								id='password'
+								type={showPassword ? 'text' : 'password'}
+								value={data.password}
+							/>
+							<Button className='btn gre' onClick={togglePasswordVisibility}>
+								{showPassword ? 'Ẩn' : 'Hiện' }
+							</Button>
+						</div>
+					</div>
+				)}
+			</SideBar>
+		</Wrapper>
 	);
 };
 export default Info;

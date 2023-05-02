@@ -20,7 +20,7 @@ function NavBar(props) {
 								: `${classes.navbar}`
 						}
 					>
-						<li>
+						{/* <li>
 							<a className={classes.active} href='index.html'>
 								Home
 							</a>
@@ -33,7 +33,8 @@ function NavBar(props) {
 						</li>
 						<li>
 							<a href='index.html'>Contact</a>
-						</li>
+						</li> */}
+
 						<Button className='btn gre' onClick={props.isSignUp}>
 							Get Started
 						</Button>

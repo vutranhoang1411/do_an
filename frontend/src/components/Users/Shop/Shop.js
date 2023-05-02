@@ -75,8 +75,6 @@ const Shop = () => {
 	const columns = [
 		{ field: 'id', header: 'ID' },
 		{ field: 'avail', header: 'Trạng thái tủ' },
-		{ field: 'open', header: 'Trạng thái' },
-
 		{ field: 'action', header: 'Action', content: 'Đăng ký' },
 	];
 	return (
@@ -89,7 +87,7 @@ const Shop = () => {
 				>
 					<div className={classes.content}>
 						{error ? (
-							<i class='material-symbols-outlined'>error</i>
+							<i className='material-symbols-outlined'>error</i>
 						) : (
 							<i className='material-symbols-outlined'>check_circle</i>
 						)}
@@ -99,7 +97,7 @@ const Shop = () => {
 				</Card>
 			)}
 			{isMsg && <div className={classes.overlay} />}
-			<SideBar currentIndex={3}>
+			<SideBar currentIndex={2}>
 				<Table data={items} columns={columns} handlePayment={handlePayment} />
 			</SideBar>
 		</div>

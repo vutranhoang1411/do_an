@@ -9,15 +9,13 @@ import classes from './SideBar.module.css';
 const Sidebar = (props) => {
 	const { setSuccess, setToken } = useContext(authContext);
 	const [navCollapse, setNavCollapse] = useState('');
+	const storedName = sessionStorage.getItem('name');
+
+
 	const SidebarItems = [
 		{
-			name: 'Home',
-			route: '/',
-			icon: 'home',
-		},
-		{
 			name: 'Thông tin cá nhân',
-			route: '/info',
+			route: '/',
 			icon: 'person',
 		},
 		{
@@ -29,6 +27,11 @@ const Sidebar = (props) => {
 			name: 'Đăng ký tủ',
 			route: '/shop',
 			icon: 'shopping_cart',
+		},
+		{
+			name: 'Lịch sử giao dịch',
+			route: '/history',
+			icon: 'history',
 		},
 	];
 	const isActive = (index) => {
@@ -59,7 +62,7 @@ const Sidebar = (props) => {
 						<i>
 							<span className='material-symbols-outlined'>account_circle</span>
 						</i>
-						<h6>Ngô Nhật Thiên</h6>
+						<h6>{storedName}</h6>
 					</div>
 					{SidebarItems.map((item, index) => (
 						<Link

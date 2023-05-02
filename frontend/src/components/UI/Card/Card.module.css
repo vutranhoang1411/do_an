@@ -47,3 +47,6 @@
 .card_contents{
     padding: 16px 4px 4px 8px;
 }
+.disappear {
+    display: none;
+}
