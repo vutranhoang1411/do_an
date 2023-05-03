@@ -75,6 +75,7 @@ const Shop = () => {
 	const columns = [
 		{ field: 'id', header: 'ID' },
 		{ field: 'avail', header: 'Trạng thái tủ' },
+		{ field: 'coord', header: 'Vị trí tủ' },
 		{ field: 'action', header: 'Action', content: 'Đăng ký' },
 	];
 	return (
