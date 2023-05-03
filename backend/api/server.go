@@ -30,10 +30,12 @@ func NewServer(conn *sql.DB,config util.Config)*Server{
 	server.router.GET("/api/locker",server.getFreeLocker)
 
 	authen_route:=server.router.Group("/api/user").Use(server.userAuthorization)
+	authen_route.GET("/",server.getUser)
 	authen_route.POST("/locker",server.userRegisterLocker)
 	authen_route.GET("/locker",server.getUserLocker)
 	authen_route.POST("/img",server.updateImg)
 	authen_route.POST("/payment",server.makePayment)
+	authen_route.GET("/payment",server.getUserPayment)
 	
 	return server
 }

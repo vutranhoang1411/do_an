@@ -15,6 +15,7 @@ type Querier interface {
 	GetAvailableCabinet(ctx context.Context) ([]Cabinet, error)
 	GetCabinetByID(ctx context.Context, id int64) (Cabinet, error)
 	GetCabinetForRent(ctx context.Context, id int64) (Cabinet, error)
+	GetCabinetRentalByUser(ctx context.Context, customerid int64) ([]CabinetLockerRental, error)
 	GetCustomer(ctx context.Context, id int64) (Customer, error)
 	GetCustomerByEmail(ctx context.Context, email string) (Customer, error)
 	GetUserCabinet(ctx context.Context, userid sql.NullInt64) ([]Cabinet, error)

@@ -85,7 +85,7 @@ func (server *Server) userRegisterLocker(ctx *gin.Context){
 		return
 	}
 	if !usr.Photo.Valid{
-		ctx.JSON(http.StatusBadRequest,handleError(fmt.Errorf("You must post your avatar before register")))
+		ctx.JSON(http.StatusBadRequest,handleError(fmt.Errorf("you must post your avatar before register")))
 		return
 	}
 	err=server.model.RegisterLockerTx(ctx,db.RegisterLockerParam{
@@ -210,8 +210,41 @@ func (server *Server) updateImg(ctx *gin.Context){
 	})
 
 }
-
-	
+type GetUserResponse struct{
+	Name     string         `json:"name"`
+	Email    string         `json:"email"`
+	Password	string	`json:"password"`
+	Photo    string `json:"photo"`
+}
+func (server *Server) getUser(ctx *gin.Context){
+	user_email:=ctx.GetString("user_info")
+	usr,err:=server.model.GetCustomerByEmail(ctx,user_email)
+	if err!=nil{
+		ctx.JSON(http.StatusBadRequest,handleError(err))
+		return
+	}
+	res:=GetUserResponse{
+		Name: usr.Name,
+		Email: usr.Email,
+		Password: usr.Password,
+		Photo: usr.Photo.String,
+	}	
+	ctx.JSON(http.StatusOK,res)
+}
+func (server *Server) getUserPayment(ctx *gin.Context){
+	user_email:=ctx.GetString("user_info")
+	usr,err:=server.model.GetCustomerByEmail(ctx,user_email)
+	if err!=nil{
+		ctx.JSON(http.StatusBadRequest,handleError(err))
+		return
+	}
+	rental,err:=server.model.GetCabinetRentalByUser(ctx,usr.ID)
+	if err!=nil{
+		ctx.JSON(http.StatusBadRequest,handleError(err))
+		return
+	}
+	ctx.JSON(http.StatusOK,rental)
+}
 // 	//write to destination, for testing purpose
 // 	dest,_:=os.Create("./static/temp/temp.png")
 // 	_,err=dest.Write(buffer)

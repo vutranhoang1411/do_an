@@ -53,3 +53,38 @@ func (q *Queries) CreateCabinetRental(ctx context.Context, arg CreateCabinetRent
 	)
 	return i, err
 }
+
+const getCabinetRentalByUser = `-- name: GetCabinetRentalByUser :many
+select id, cabinetid, customerid, rentdate, duration, paymentmethod, fee from cabinet_locker_rentals where CustomerID=$1
+`
+
+func (q *Queries) GetCabinetRentalByUser(ctx context.Context, customerid int64) ([]CabinetLockerRental, error) {
+	rows, err := q.db.QueryContext(ctx, getCabinetRentalByUser, customerid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []CabinetLockerRental{}
+	for rows.Next() {
+		var i CabinetLockerRental
+		if err := rows.Scan(
+			&i.ID,
+			&i.Cabinetid,
+			&i.Customerid,
+			&i.Rentdate,
+			&i.Duration,
+			&i.Paymentmethod,
+			&i.Fee,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
