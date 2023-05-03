@@ -3,6 +3,7 @@ CREATE TABLE cabinet
   ID    bigserial  NOT NULL,
   avail   bool NOT NULL DEFAULT true,
   open   bool NOT NULL DEFAULT false,
+  coord  varchar not null,
   start  timestamptz,
   userID bigint ,
   PRIMARY KEY (ID)
