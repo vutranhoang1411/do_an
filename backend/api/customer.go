@@ -104,6 +104,7 @@ type GetLockerResponse struct{
 	ID int64 `json:"id"`
 	Start string `json:"start_time"`
 	Open bool `json:"open"`
+	Coord string `json:"coord"`
 }
 func (server *Server) getUserLocker(ctx *gin.Context){
 	user_email:=ctx.GetString("user_info")
@@ -125,6 +126,7 @@ func (server *Server) getUserLocker(ctx *gin.Context){
 		temp:=GetLockerResponse{
 			ID:locker.ID,
 			Open: locker.Open,
+			Coord: locker.Coord,
 		}
 		if locker.Start.Valid{
 			temp.Start=locker.Start.Time.Format("2006-01-02 15:04:05")
