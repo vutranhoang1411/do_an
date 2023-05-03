@@ -36,9 +36,7 @@ const SignUp = (props) => {
 			})
 			.then((data) => {
 				setIsSuccess(true);
-				// setIsMsg(true);
-				// setMessageTitle('Thành công');
-				// setMessageContent('Bạn đã đăng ký thành công!!!');
+
 			})
 			.catch((err) => {
 				const errorMessage = JSON.parse(err.message).error;

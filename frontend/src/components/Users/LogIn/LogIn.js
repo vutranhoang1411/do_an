@@ -35,7 +35,6 @@ const LogIn = (props) => {
 			.then((data) => {
 				setIsSuccess(true);
 				const token = data.token;
-				console.log(token);
 				sessionStorage.setItem('token', token);
 			})
 			.catch((err) => {

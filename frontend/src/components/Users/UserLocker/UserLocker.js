@@ -137,7 +137,7 @@ const UserLocker = () => {
 				</Card>
 			)}
 			{isMsg && <div className={classes.overlay} />}
-			<SideBar currentIndex={2}>
+			<SideBar currentIndex={1}>
 				<Table data={items} columns={columns} handlePayment={handlePayment} />
 				<div className={`${classes.payment} ${closed ? classes.closed : ''}`}>
 					<div className={classes.header}>

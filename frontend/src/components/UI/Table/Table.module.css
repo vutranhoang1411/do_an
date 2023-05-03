@@ -31,6 +31,14 @@
 .table button {
 	padding: 5px 10px ;
 }
+.availTrue {
+	color: blue;
+	font-weight: bold;
+}
+.availFalse {
+	color: red;
+	font-weight: bold;
+}
 /* Helper */
 .rightFormat {
 	text-align: right !important;

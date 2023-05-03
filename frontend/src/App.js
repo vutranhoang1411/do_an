@@ -5,7 +5,7 @@ import { authContext } from './context/authContext';
 import Home from './components/Home/Home';
 import Shop from './components/Users/Shop/Shop';
 import Info from './components/Users/Info/Info';
-import SideBar from './components/UI/SideBar/SideBar';
+import History from './components/Users/History/History';
 import NotFound from './components/NotFound/NotFound';
 import UserLocker from './components/Users/UserLocker/UserLocker';
 
@@ -29,13 +29,14 @@ function App() {
 		<authContext.Provider value={{ success, setSuccess, token, setToken }}>
 			<Routes>
 				{success ? (
-					<Route path='/' element={<SideBar />} />
+					<Route path='/' element={<Info />} />
 				) : (
 					<Route path='/' element={<Home />} />
 				)}
 				{success && <Route path='/userLocker' element={<UserLocker />} />}
-				{success && <Route path='/info' element={<Info />} />}
-				{success && <Route path='/Shop' element={<Shop />} />}
+				{success && <Route path='/shop' element={<Shop />} />}
+				{success && <Route path='/history' element={<History />} />}
+
 				{success != null && <Route path='*' element={<NotFound />} />}
 			</Routes>
 		</authContext.Provider>
