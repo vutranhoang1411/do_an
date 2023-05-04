@@ -20,7 +20,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('rentals/',getAll.as_view()),
     path('count/',getNumOfUsedCabinet.as_view()),
-    path('image/',getOcuppiedCabinet.as_view()),
+    path('image/',FileUploadView.as_view()),
     path('cabin/',getCabinet.as_view()),
     path('test/',CabinetLockerRevenueView.as_view())
 ]

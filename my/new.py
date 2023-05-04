@@ -39,7 +39,7 @@ def message(client , feed_id:str , payload:str):
     if feed_id=="doan.image-detect":
         cur.execute("""
             select cabinet.id, customer.photo 
-            from cabinet left join customer on cabinet.userid=customer.id 
+            from cabi`net left join customer on cabinet.userid=customer.id 
             where cabinet.avail=false;;
         """)
         cabinets = cur.fetchall()

@@ -66,37 +66,24 @@ class FileUploadView(APIView):
 
     def post(self, request):
         up_file = request.FILES['file']
- # File should be closed only after all chuns are added
-
-        img_files=listdir("./base_image")
-        knowface_encodes=[]
-        knowface_name=[]
-
-
-        for img_file in img_files:
-            #get img name
-            knowface_name.append(img_file.split(".")[0])
-
-            #get encode
-            img=face_recognition.load_image_file('./base_image/'+img_file)
-            encode=face_recognition.face_encodings(img)[0]
-            knowface_encodes.append(encode)
-
-        #get img from request
-
         #process target img
         target_img=face_recognition.load_image_file(up_file)
-        target_encode=face_recognition.face_encodings(target_img)[0]
+        encodes=face_recognition.face_encodings(target_img)
+        if len(encodes)==0:
+            return Response(data=[])
+        
+        target_encode=encodes[0]
+        res=[]
 
+        cabinets=Cabinet.objects.select_related('userid').filter(avail=False)
+        for cabin in cabinets:
+            img_path=cabin.userid.photo
+            img=face_recognition.load_image_file("/home/hoangdeptrai/ki2nam3/do_an/backend/public/img/"+img_path)
+            cur_encode=face_recognition.face_encodings(img)
+            if face_recognition.compare_faces(cur_encode,target_encode)[0]:
+                res.append(cabin.id)
         #get candidate matches list
-        matches=face_recognition.compare_faces(knowface_encodes,target_encode)
-        #get closet img to the target
-        face_distances = face_recognition.face_distance(knowface_encodes,target_encode)
-        best_match_index = np.argmin(face_distances)
-
-        if matches[best_match_index]:
-            return Response({'face':knowface_name[best_match_index]})
-        return Response(up_file.name, status.HTTP_201_CREATED)
+        return Response(res)
 
 
 class CabinetLockerRevenueView(APIView):
