@@ -4,7 +4,6 @@ from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import RentalsSer, usedCabinetCount,CabinetLockerRentalsSerializer
 from .models import CabinetLockerRentals, Cabinet
 import face_recognition
 from os import listdir
@@ -17,12 +16,12 @@ from django.db.models.functions import ExtractWeekDay
 
 class getAll(APIView):
     def get (self, request):
-        rentals=CabinetLockerRentals.objects.order_by('-id').select_related('customerid')[:10]
+        rentals=CabinetLockerRentals.objects.order_by('-id').select_related('userid')[:10]
         data=[]
         for record in rentals:
             record_data={
                 'id':record.id,
-                'customer_name':record.customerid.name,
+                'customer_name':record.userid.name,
                 'rentdate':record.rentdate.strftime('%Y-%m-%d %H:%M:%S'),
                 'fee':record.fee ,              
             }
@@ -31,19 +30,19 @@ class getAll(APIView):
         return Response(data)
 class getNumOfUsedCabinet(APIView):
     def get(self, request):
-        count=Cabinet.objects.filter(aval=False).count()
+        count=Cabinet.objects.filter(avail=False).count()
         return Response({'count':count})
 class getCabinet(APIView):
     def get(self, request):
-        cabinets = Cabinet.objects.order_by('aval','id').select_related('customerid')
+        cabinets = Cabinet.objects.order_by('avail','id').select_related('userid')
         data = []
         for cabinet in cabinets:
             position = f"Row   {cabinet.coord['y']+1} Column   {cabinet.coord['x']+1}"
             cabinet_data = {
                 'id': cabinet.id,
                 'position': position,
-                'customer': None if cabinet.customerid is None else cabinet.customerid.name,
-                'occupied':  not cabinet.aval,
+                'customer': None if cabinet.userid is None else cabinet.userid.name,
+                'occupied':  not cabinet.avail,
                 # Add any other fields you want to include in the response
             }
             data.append(cabinet_data)
@@ -51,12 +50,12 @@ class getCabinet(APIView):
 
 class getOcuppiedCabinet(APIView):
     def get(self, request):
-        cabinets = Cabinet.objects.filter(aval=False).select_related('customerid')
+        cabinets = Cabinet.objects.filter(avail=False).select_related('userid')
         data = []
         for cabinet in cabinets:
             cabinet_data={
                 'id':cabinet.id,
-                'path':cabinet.customerid.image,
+                'path':cabinet.userid.image,
             }
             data.append(cabinet_data)
         return Response(data)
