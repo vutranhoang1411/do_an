@@ -8,6 +8,7 @@ from .models import CabinetLockerRentals, Cabinet, Customer
 import face_recognition
 from os import listdir
 import numpy as np
+import json
 from datetime import date, timedelta
 from django.db.models import Sum
 from django.db.models.functions import ExtractWeekDay
@@ -16,13 +17,13 @@ from django.db.models.functions import ExtractWeekDay
 
 class getAll(APIView):
     def get (self, request):
-        rentals=CabinetLockerRentals.objects.order_by('-id').select_related('userid')[:10]
+        rentals=CabinetLockerRentals.objects.order_by('-id').select_related('customerid')[:10]
         data=[]
-        for record in rentals:
+        for record in rentals: 
             record_data={
                 'id':record.id,
-                'customer_name':record.userid.name,
-                'rentdate':record.rentdate.strftime('%Y-%m-%d %H:%M:%S'),
+                'customer_name':record.customerid.name,
+                'rentdate':record.rentdate.strftime("%H:%M %A %d %B, %Y"),
                 'fee':record.fee ,              
             }
             data.append(record_data)
@@ -37,7 +38,9 @@ class getCabinet(APIView):
         cabinets = Cabinet.objects.order_by('avail','id').select_related('userid')
         data = []
         for cabinet in cabinets:
-            position = f"Row   {cabinet.coord['y']+1} Column   {cabinet.coord['x']+1}"
+            coord=cabinet.coord
+            coord=json.loads(coord)
+            position = f"Row   {coord['y']+1} Column   {coord['x']+1}"
             cabinet_data = {
                 'id': cabinet.id,
                 'position': position,
@@ -55,14 +58,16 @@ class GetAllRentals(APIView):
         data=[]
         for rental in rentals:
             cabinet=rental.cabinetid
-            position = f"Row   {cabinet.coord['y']+1} Column   {cabinet.coord['x']+1}"
+            coord=cabinet.coord
+            coord=json.loads(coord)
+            position = f"Row   {coord['y']+1} Column   {coord['x']+1}"
             total_seconds=rental.duration.total_seconds()
             hours = int(total_seconds // 3600)
             minutes = int((total_seconds % 3600) // 60)
 
             tuple={
                 'id':rental.id,
-                'rentdate': rental.rentdate,
+                'rentdate': rental.rentdate.strftime("%H:%M %A %d %B, %Y"),
                 'pos':position,
                 'name':rental.customerid.name,
                 'duration': f"{hours} hours and {minutes} minutes",
@@ -81,7 +86,7 @@ class GetAllCustomers(APIView):
             customer_info = {
                 'id': customer.id,
                 'name': customer.name,
-                # 'email': customer.email,
+                'email': customer.email,
                 # 'phone': customer.phone,
                 'total_spent': total_spent,
             }
