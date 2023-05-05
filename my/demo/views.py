@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework import status
-from .models import CabinetLockerRentals, Cabinet
+from .models import CabinetLockerRentals, Cabinet, Customer
 import face_recognition
 from os import listdir
 import numpy as np
@@ -43,11 +43,50 @@ class getCabinet(APIView):
                 'position': position,
                 'customer': None if cabinet.userid is None else cabinet.userid.name,
                 'occupied':  not cabinet.avail,
+                'date': None if not cabinet.start else cabinet.start.strftime("%H:%M %A %d %B, %Y")
+
                 # Add any other fields you want to include in the response
             }
             data.append(cabinet_data)
         return Response(data)
+class GetAllRentals(APIView):
+    def get(self, request):
+        rentals = CabinetLockerRentals.objects.select_related('customerid', 'cabinetid')
+        data=[]
+        for rental in rentals:
+            cabinet=rental.cabinetid
+            position = f"Row   {cabinet.coord['y']+1} Column   {cabinet.coord['x']+1}"
+            total_seconds=rental.duration.total_seconds()
+            hours = int(total_seconds // 3600)
+            minutes = int((total_seconds % 3600) // 60)
 
+            tuple={
+                'id':rental.id,
+                'rentdate': rental.rentdate,
+                'pos':position,
+                'name':rental.customerid.name,
+                'duration': f"{hours} hours and {minutes} minutes",
+                'paymentmethod': rental.paymentmethod,
+                'fee':rental.fee,
+            }
+            data.append(tuple)
+        return Response(data)
+class GetAllCustomers(APIView):
+    def get(self, request):
+        customers = Customer.objects.all()
+        response = []
+        for customer in customers:
+            rentals = CabinetLockerRentals.objects.filter(customerid=customer)
+            total_spent = sum(rental.fee for rental in rentals)
+            customer_info = {
+                'id': customer.id,
+                'name': customer.name,
+                # 'email': customer.email,
+                # 'phone': customer.phone,
+                'total_spent': total_spent,
+            }
+            response.append(customer_info)
+        return Response(response)
 class getOcuppiedCabinet(APIView):
     def get(self, request):
         cabinets = Cabinet.objects.filter(avail=False).select_related('userid')
@@ -65,6 +104,24 @@ class FileUploadView(APIView):
 
     def post(self, request):
         up_file = request.FILES['file']
+ # File should be closed only after all chuns are added
+
+        img_files=listdir("./base_image")
+        knowface_encodes=[]
+        knowface_name=[]
+
+
+        for img_file in img_files:
+            #get img name
+            knowface_name.append(img_file.split(".")[0])
+
+            #get encode
+            img=face_recognition.load_image_file('./base_image/'+img_file)
+            encode=face_recognition.face_encodings(img)[0]
+            knowface_encodes.append(encode)
+
+        #get img from request
+
         #process target img
         target_img=face_recognition.load_image_file(up_file)
         encodes=face_recognition.face_encodings(target_img)
@@ -99,4 +156,36 @@ class CabinetLockerRevenueView(APIView):
             
             data.append({'x': weekday, 'y': float(revenue)})
             
+        return Response(data)
+
+
+
+class RentalRevenueView(APIView):
+    def get(self, request):
+        # Get the current date
+        today = date.today()
+
+        # Calculate the start of the last 30 days and last 7 days
+        start_of_last_30_days = today - timedelta(days=29)
+        start_of_last_7_days = today - timedelta(days=6)
+
+        # Get the total revenue for all rentals
+        total_revenue = CabinetLockerRentals.objects.aggregate(total_revenue=Sum('fee'))['total_revenue'] or 0
+
+        # Get the revenue for rentals in the last 30 days
+        last_30_days_revenue = CabinetLockerRentals.objects \
+            .filter(rentdate__date__range=[start_of_last_30_days, today]) \
+            .aggregate(last_30_days_revenue=Sum('fee'))['last_30_days_revenue'] or 0
+
+        # Get the revenue for rentals in the last 7 days
+        last_7_days_revenue = CabinetLockerRentals.objects \
+            .filter(rentdate__date__range=[start_of_last_7_days, today]) \
+            .aggregate(last_7_days_revenue=Sum('fee'))['last_7_days_revenue'] or 0
+
+        # Return a JSON response with the revenue data
+        data = {
+            'total': total_revenue,
+            'monthly': last_30_days_revenue,
+            'weekly': last_7_days_revenue,
+        }
         return Response(data)

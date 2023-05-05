@@ -22,5 +22,8 @@ urlpatterns = [
     path('count/',getNumOfUsedCabinet.as_view()),
     path('image/',FileUploadView.as_view()),
     path('cabin/',getCabinet.as_view()),
-    path('test/',CabinetLockerRevenueView.as_view())
+    path('test/',CabinetLockerRevenueView.as_view()),
+    path('sum/',RentalRevenueView.as_view()),
+    path('allrentals/',GetAllRentals.as_view()),
+    path('getcus/',GetAllCustomers.as_view())
 ]
