@@ -123,6 +123,7 @@ const UserLocker = () => {
 	const columns = [
 		{ field: 'id', header: 'ID' },
 		{ field: 'start_time', header: 'Thời gian bắt đầu thuê' },
+		{ field: 'coord', header: 'Vị trí tủ' },
 		{ field: 'action', header: 'Action', content: 'Thanh toán' },
 	];
 	return (

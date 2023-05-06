@@ -11,9 +11,8 @@ import { authContext } from '../../../context/authContext';
 import classes from './Info.module.css';
 
 const Info = () => {
-
 	const { token } = useContext(authContext);
-	const [data, setData] = useState(null);
+	const [data, setData] = useState({ name: '', email: '', password: '' });
 	const [image, setImage] = useState('');
 
 	const [showPassword, setShowPassword] = useState(false);
@@ -39,7 +38,10 @@ const Info = () => {
 	};
 	const closeUpdateImg = () => {
 		setShowUpdateImg(false);
-	}
+	};
+	const inputChangedHandler = (event) => {
+		return event.target.value;
+	};
 	// Update image
 	const config = {
 		headers: {
@@ -54,12 +56,12 @@ const Info = () => {
 		axios
 			.post(`${window.url}/api/user/img`, config, formData)
 			.then((response) => {
-				if(response.status === 200) {
+				if (response.status === 200) {
 					setIsMsg(true);
 					setShowUpdateImg(false);
 					setMessageTitle('Thành công');
 					setMessageContent('Bạn đã cập nhật ảnh thành công!!!');
-				}else {
+				} else {
 					return response.text().then((text) => {
 						throw new Error(text);
 					});
@@ -89,7 +91,7 @@ const Info = () => {
 				setData(dataJson);
 			})
 			.catch((error) => console.error(error));
-	}, );
+	}, [token]);
 
 	return (
 		<Wrapper>
@@ -136,33 +138,42 @@ const Info = () => {
 
 			{(isMsg || showUpdateImg) && <div className={classes.overlay} />}
 			<SideBar currentIndex={0}>
-				{data && (
-					<div className={classes.container}>
-						<div className={classes.title}> Thông tin cá nhân </div>
-						<div className={classes.image}>
-							<img src='img/avt.jpg' alt='profile' />
-							<div className={classes.update} onClick={toggleUpdateImg}>
-								Upload ảnh
-							</div>
-						</div>
-
-						<div className={classes.input}>
-							<label htmlFor='username'>Họ và Tên</label>
-							<input id='username' type='text' value={data.name} />
-							<label htmlFor='age'>Địa chỉ email</label>
-							<input id='age' type='email' value={data.email} />
-							<label htmlFor='password'>Mật khẩu</label>
-							<input
-								id='password'
-								type={showPassword ? 'text' : 'password'}
-								value={data.password}
-							/>
-							<Button className='btn gre' onClick={togglePasswordVisibility}>
-								{showPassword ? 'Ẩn' : 'Hiện' }
-							</Button>
+				<div className={classes.container}>
+					<div className={classes.title}> Thông tin cá nhân </div>
+					<div className={classes.image}>
+						{data.photo && <img src={`img/${data.photo}`} alt='profile' />}
+						<div className={classes.update} onClick={toggleUpdateImg}>
+							Upload ảnh
 						</div>
 					</div>
-				)}
+					<div className={classes.input}>
+						<label htmlFor='username'>Họ và Tên</label>
+						<input
+							id='username'
+							type='text'
+							value={data.name}
+							onChange={(event) => inputChangedHandler(event)}
+						/>
+						<label htmlFor='age'>Địa chỉ email</label>
+						<input
+							id='age'
+							type='email'
+							value={data.email}
+							onChange={(event) => inputChangedHandler(event)}
+						/>
+						<label htmlFor='password'>Mật khẩu</label>
+						<input
+							id='password'
+							type={showPassword ? 'text' : 'password'}
+							value={data.password}
+							onChange={(event) => inputChangedHandler(event)}
+						/>
+
+						<Button className='btn gre' onClick={togglePasswordVisibility}>
+							{showPassword ? 'Ẩn' : 'Hiện'}
+						</Button>
+					</div>
+				</div>
 			</SideBar>
 		</Wrapper>
 	);
