@@ -103,7 +103,6 @@ func (server *Server) userRegisterLocker(ctx *gin.Context){
 type GetLockerResponse struct{
 	ID int64 `json:"id"`
 	Start string `json:"start_time"`
-	Open bool `json:"open"`
 	Coord string `json:"coord"`
 }
 func (server *Server) getUserLocker(ctx *gin.Context){
@@ -125,7 +124,6 @@ func (server *Server) getUserLocker(ctx *gin.Context){
 	for _,locker:=range locker_list{
 		temp:=GetLockerResponse{
 			ID:locker.ID,
-			Open: locker.Open,
 			Coord: locker.Coord,
 		}
 		if locker.Start.Valid{
