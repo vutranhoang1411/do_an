@@ -22,6 +22,7 @@ func NewServer(conn *sql.DB,config util.Config)*Server{
 	server.config=config
 	server.maker=token.NewPasetoMaker(config.TokenKey)
 	server.router=gin.Default()
+	server.router.Static("/public/img","/home/hoangdeptrai/ki2nam3/do_an/backend/public/img")
 	server.router.Use(CORSMiddleware())
 	
 	///add route

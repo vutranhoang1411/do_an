@@ -51,7 +51,7 @@ func (server *Server) loginUser(ctx *gin.Context){
 	}
 	customer,err:=server.model.GetCustomerByEmail(ctx,reqBody.Email)
 	if err!=nil{
-		ctx.JSON(http.StatusInternalServerError,handleError((err)))
+		ctx.JSON(http.StatusForbidden,handleError(fmt.Errorf("wrong username or password")))
 		return
 	}
 	if reqBody.Password!=customer.Password{

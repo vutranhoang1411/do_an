@@ -13,7 +13,7 @@ import classes from './Info.module.css';
 const Info = () => {
 	const { token } = useContext(authContext);
 	const [data, setData] = useState({ name: '', email: '', password: '' });
-	const [image, setImage] = useState('');
+	const [image, setImage] = useState({});
 
 	const [showPassword, setShowPassword] = useState(false);
 	const [showUpdateImg, setShowUpdateImg] = useState(false);
@@ -43,18 +43,15 @@ const Info = () => {
 		return event.target.value;
 	};
 	// Update image
-	const config = {
-		headers: {
-			authorization: `${token}`,
-			'Content-Type': 'application/json',
-		},
-	};
+	const 	headers = {
+			'authorization': `${token}`,
+		};
 
 	const handleAPI = () => {
 		const formData = new FormData();
-		formData.append('image', image);
+		formData.append('img', image);
 		axios
-			.post(`${window.url}/api/user/img`, config, formData)
+			.post(`${window.url}/api/user/img`, formData, {headers})
 			.then((response) => {
 				if (response.status === 200) {
 					setIsMsg(true);
@@ -141,7 +138,7 @@ const Info = () => {
 				<div className={classes.container}>
 					<div className={classes.title}> Thông tin cá nhân </div>
 					<div className={classes.image}>
-						{data.photo && <img src={`img/${data.photo}`} alt='profile' />}
+						{data.photo && <img src={`${window.url}/public/img/${data.photo}`} alt='profile' />}
 						<div className={classes.update} onClick={toggleUpdateImg}>
 							Upload ảnh
 						</div>

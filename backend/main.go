@@ -18,7 +18,6 @@ func main(){
 	if err!=nil{
 		log.Fatal(err)
 	}
-
 	server:=api.NewServer(conn,config)
 	server.Start(config.HttpServerAddress)
 }

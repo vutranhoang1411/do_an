@@ -43,7 +43,7 @@ const UserLocker = () => {
 								<td>{d.id}</td>
 								<td>{d.customerid}</td>
 								<td>{d.rentdate}</td>
-								<td>{d.duration} days</td>
+								<td>{d.duration}</td>
 								<td>{d.paymentmethod}</td>
 								<td>{d.fee} VND</td>
 							</tr>

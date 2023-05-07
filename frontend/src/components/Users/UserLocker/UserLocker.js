@@ -168,7 +168,7 @@ const UserLocker = () => {
 						<input
 							type='radio'
 							name='payment'
-							value='zalo'
+							value='zalopay'
 							onChange={handleOptionChange}
 						/>
 						<label htmlFor='javascript'>Ví điện tử zalopay</label>
