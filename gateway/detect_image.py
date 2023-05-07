@@ -1,18 +1,34 @@
 import face_recognition
+from hardware_connector import *
 import cv2
 import numpy as np
+import requests
 import simple_lock
 import threading
 from time import sleep
 import base64
-
+test_url="http://localhost:8000/image/"
+def sendRequest(file):
+    response=requests.post(test_url,files={
+        "file":file
+    })
+    if response.ok:
+        response_body=response.text
+        response_body=response_body.replace("[","")
+        response_body=response_body.replace("]","")
+        if len(response_body)==0:
+            print("empty array")
+        else:
+            #send serial to hardware
+            print(response_body)
+    else:
+        print("Something went wrong!")
 def UnlockLock(lock):
-    sleep(30)
+    sleep(10)
     lock.Unlock()
 class AICam:
-    def __init__(self,client):
+    def __init__(self):
         self.video_capture=cv2.VideoCapture(0)
-        self.client=client
 
     def StartRecord(self):
         lock=simple_lock.Lock()
@@ -29,9 +45,9 @@ class AICam:
                     if lock.Locked==False:
                         lock.Lock()
                         threading.Thread(target=UnlockLock,args=(lock,)).start()
-                        img_bytes=cv2.imencode('.jpg',small_frame)[1].tobytes()
-                        data=base64.b64encode(img_bytes)
-                        self.client.publish("doan.image-detect",data)   
+                        file=cv2.imencode('.jpg',small_frame)[1].tobytes()
+                        threading.Thread(target=sendRequest,args=(file,)).start()
+                         
             
 
             process_this_frame = not process_this_frame
