@@ -5,11 +5,10 @@ from Adafruit_IO import MQTTClient
 import sys
 import threading
 
-#set up adafruit connect
 
 AIO_USERNAME = "vutranhoang1411"
-AIO_KEY = ""
-AIO_FEED_IDs = ["doan.open-locker"]
+AIO_KEY = "aio_YxmO16iRoAzE7EL325vzHzSl8JAG"
+AIO_FEED_IDs = []
 
 client = MQTTClient(AIO_USERNAME,AIO_KEY)
 
@@ -27,11 +26,6 @@ def disconnected(client):
 
 def message(client , feed_id:str , payload:str):
     pass
-    # if feed_id=="doan.open-locker":
-    #     devs=payload.split(",")
-    #     for dev in devs:
-    #         sendSerial(dev)
-
 
 client.on_connect = on_connect
 client.on_message = message
@@ -40,17 +34,16 @@ client.on_disconnect=disconnected
 client.connect()
 client.loop_background()
 sleep(5)
-
 #thread to read from serial
 def receiveSerialMsg():
     while True:
         readSerial(client)
 
-threading.Thread(target=receiveSerialMsg)
+threading.Thread(target=receiveSerialMsg).start()
 
 # main thread to detect img
 
-cam=AICam(client)
+cam=AICam()
 cam.StartRecord()
 
     

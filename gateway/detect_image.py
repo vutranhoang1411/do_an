@@ -16,15 +16,12 @@ def sendRequest(file):
         response_body=response.text
         response_body=response_body.replace("[","")
         response_body=response_body.replace("]","")
-        if len(response_body)==0:
-            print("empty array")
-        else:
-            #send serial to hardware
-            print(response_body)
+        sendSerial(response_body)
+
     else:
         print("Something went wrong!")
 def UnlockLock(lock):
-    sleep(10)
+    sleep(15)
     lock.Unlock()
 class AICam:
     def __init__(self):
