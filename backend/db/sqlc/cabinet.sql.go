@@ -11,7 +11,7 @@ import (
 )
 
 const getAvailableCabinet = `-- name: GetAvailableCabinet :many
-select id, avail, open, start, userid from cabinet where avail=true
+select id, avail, coord, start, userid from cabinet where avail=true
 `
 
 func (q *Queries) GetAvailableCabinet(ctx context.Context) ([]Cabinet, error) {
@@ -26,7 +26,7 @@ func (q *Queries) GetAvailableCabinet(ctx context.Context) ([]Cabinet, error) {
 		if err := rows.Scan(
 			&i.ID,
 			&i.Avail,
-			&i.Open,
+			&i.Coord,
 			&i.Start,
 			&i.Userid,
 		); err != nil {
@@ -44,7 +44,7 @@ func (q *Queries) GetAvailableCabinet(ctx context.Context) ([]Cabinet, error) {
 }
 
 const getCabinetByID = `-- name: GetCabinetByID :one
-select id, avail, open, start, userid from cabinet where ID=$1
+select id, avail, coord, start, userid from cabinet where ID=$1
 `
 
 func (q *Queries) GetCabinetByID(ctx context.Context, id int64) (Cabinet, error) {
@@ -53,7 +53,7 @@ func (q *Queries) GetCabinetByID(ctx context.Context, id int64) (Cabinet, error)
 	err := row.Scan(
 		&i.ID,
 		&i.Avail,
-		&i.Open,
+		&i.Coord,
 		&i.Start,
 		&i.Userid,
 	)
@@ -61,7 +61,7 @@ func (q *Queries) GetCabinetByID(ctx context.Context, id int64) (Cabinet, error)
 }
 
 const getCabinetForRent = `-- name: GetCabinetForRent :one
-select id, avail, open, start, userid from cabinet where ID=$1 FOR UPDATE
+select id, avail, coord, start, userid from cabinet where ID=$1 FOR UPDATE
 `
 
 func (q *Queries) GetCabinetForRent(ctx context.Context, id int64) (Cabinet, error) {
@@ -70,7 +70,7 @@ func (q *Queries) GetCabinetForRent(ctx context.Context, id int64) (Cabinet, err
 	err := row.Scan(
 		&i.ID,
 		&i.Avail,
-		&i.Open,
+		&i.Coord,
 		&i.Start,
 		&i.Userid,
 	)
@@ -78,7 +78,7 @@ func (q *Queries) GetCabinetForRent(ctx context.Context, id int64) (Cabinet, err
 }
 
 const getUserCabinet = `-- name: GetUserCabinet :many
-select id, avail, open, start, userid from cabinet where userID=$1
+select id, avail, coord, start, userid from cabinet where userID=$1
 `
 
 func (q *Queries) GetUserCabinet(ctx context.Context, userid sql.NullInt64) ([]Cabinet, error) {
@@ -93,7 +93,7 @@ func (q *Queries) GetUserCabinet(ctx context.Context, userid sql.NullInt64) ([]C
 		if err := rows.Scan(
 			&i.ID,
 			&i.Avail,
-			&i.Open,
+			&i.Coord,
 			&i.Start,
 			&i.Userid,
 		); err != nil {
@@ -134,7 +134,7 @@ func (q *Queries) UnrentCabinet(ctx context.Context, id int64) error {
 }
 
 const updateCabinetClose = `-- name: UpdateCabinetClose :one
-update cabinet set open=false where ID=$1 returning id, avail, open, start, userid
+update cabinet set open=false where ID=$1 returning id, avail, coord, start, userid
 `
 
 func (q *Queries) UpdateCabinetClose(ctx context.Context, id int64) (Cabinet, error) {
@@ -143,7 +143,7 @@ func (q *Queries) UpdateCabinetClose(ctx context.Context, id int64) (Cabinet, er
 	err := row.Scan(
 		&i.ID,
 		&i.Avail,
-		&i.Open,
+		&i.Coord,
 		&i.Start,
 		&i.Userid,
 	)
@@ -151,7 +151,7 @@ func (q *Queries) UpdateCabinetClose(ctx context.Context, id int64) (Cabinet, er
 }
 
 const updateCabinetOpen = `-- name: UpdateCabinetOpen :one
-update cabinet set open=true where ID=$1 returning id, avail, open, start, userid
+update cabinet set open=true where ID=$1 returning id, avail, coord, start, userid
 `
 
 func (q *Queries) UpdateCabinetOpen(ctx context.Context, id int64) (Cabinet, error) {
@@ -160,7 +160,7 @@ func (q *Queries) UpdateCabinetOpen(ctx context.Context, id int64) (Cabinet, err
 	err := row.Scan(
 		&i.ID,
 		&i.Avail,
-		&i.Open,
+		&i.Coord,
 		&i.Start,
 		&i.Userid,
 	)

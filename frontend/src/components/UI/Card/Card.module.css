@@ -1,0 +1,52 @@
+
+.card{
+    background-color: white;
+    padding: 8px;
+    border-radius: 12px;
+    border: 1px solid #BACDD8;
+    max-width: 300px;
+}
+.title {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 16px 0px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid red;
+    text-align: center;
+}
+.content {
+    font-size: 14px;
+    color:#7F8C9B;
+    line-height:150%;
+    font-weight: 500;
+}
+.success i{
+    font-size: 60px;
+    color: #17cf97;
+}
+.error i{
+    font-size: 60px;
+    color: red;
+}
+.btn{
+    border: none;
+    padding: 12px 24px;
+    border-radius:8px;
+    font-weight: 600;
+    color: #0077ff;
+    background-color:#e0efff;
+    margin: 10px auto;
+    display: block;
+    transition: all 0.3s ease-in-out;
+    cursor: pointer;
+}
+.btn:focus, .btn:hover{
+    background-color: #0077ff;
+    color:#e0efff;
+}
+.card_contents{
+    padding: 16px 4px 4px 8px;
+}
+.disappear {
+    display: none;
+}

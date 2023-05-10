@@ -12,7 +12,7 @@ import (
 type Cabinet struct {
 	ID     int64         `json:"id"`
 	Avail  bool          `json:"avail"`
-	Open   bool          `json:"open"`
+	Coord  string        `json:"coord"`
 	Start  sql.NullTime  `json:"start"`
 	Userid sql.NullInt64 `json:"userid"`
 }
