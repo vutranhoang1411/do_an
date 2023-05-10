@@ -109,24 +109,6 @@ class FileUploadView(APIView):
 
     def post(self, request):
         up_file = request.FILES['file']
- # File should be closed only after all chuns are added
-
-        img_files=listdir("./base_image")
-        knowface_encodes=[]
-        knowface_name=[]
-
-
-        for img_file in img_files:
-            #get img name
-            knowface_name.append(img_file.split(".")[0])
-
-            #get encode
-            img=face_recognition.load_image_file('./base_image/'+img_file)
-            encode=face_recognition.face_encodings(img)[0]
-            knowface_encodes.append(encode)
-
-        #get img from request
-
         #process target img
         target_img=face_recognition.load_image_file(up_file)
         encodes=face_recognition.face_encodings(target_img)
