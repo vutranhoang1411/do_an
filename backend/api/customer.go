@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	db "github.com/vutranhoang1411/do_an_da_nganh/db/sqlc"
@@ -52,7 +51,7 @@ func (server *Server) loginUser(ctx *gin.Context){
 	}
 	customer,err:=server.model.GetCustomerByEmail(ctx,reqBody.Email)
 	if err!=nil{
-		ctx.JSON(http.StatusInternalServerError,handleError((err)))
+		ctx.JSON(http.StatusForbidden,handleError(fmt.Errorf("wrong username or password")))
 		return
 	}
 	if reqBody.Password!=customer.Password{
@@ -69,15 +68,14 @@ func (server *Server) loginUser(ctx *gin.Context){
 		"token":token,
 	})
 }
+type userRegisterLockerRequest struct{
+	LockerID int64 `json:"locker_id"`
+}
 func (server *Server) userRegisterLocker(ctx *gin.Context){
-	locker_id_param:=ctx.PostForm("locker_id")
-	if len(locker_id_param)<1{
-		ctx.JSON(http.StatusBadRequest,handleError(fmt.Errorf("no locker ID provided")))
-		return
-	}
-	lockerID,err:=strconv.ParseInt(locker_id_param,10,64)
+	var req userRegisterLockerRequest
+	err:=ctx.ShouldBindJSON(&req)
 	if err!=nil{
-		ctx.JSON(http.StatusBadRequest,handleError(fmt.Errorf("invalid locker ID")))
+		ctx.JSON(http.StatusBadRequest,handleError(fmt.Errorf("no locker ID provided")))
 		return
 	}
 	user_email:=ctx.GetString("user_info")
@@ -87,12 +85,12 @@ func (server *Server) userRegisterLocker(ctx *gin.Context){
 		return
 	}
 	if !usr.Photo.Valid{
-		ctx.JSON(http.StatusBadRequest,handleError(fmt.Errorf("You must post your avatar before register")))
+		ctx.JSON(http.StatusBadRequest,handleError(fmt.Errorf("you must post your avatar before register")))
 		return
 	}
 	err=server.model.RegisterLockerTx(ctx,db.RegisterLockerParam{
 		UserEmail: user_email,
-		LockerID: lockerID,
+		LockerID: req.LockerID,
 	})
 	if err!=nil{
 		ctx.JSON(http.StatusBadRequest,handleError(err))
@@ -105,6 +103,7 @@ func (server *Server) userRegisterLocker(ctx *gin.Context){
 type GetLockerResponse struct{
 	ID int64 `json:"id"`
 	Start string `json:"start_time"`
+	Coord string `json:"coord"`
 }
 func (server *Server) getUserLocker(ctx *gin.Context){
 	user_email:=ctx.GetString("user_info")
@@ -125,6 +124,7 @@ func (server *Server) getUserLocker(ctx *gin.Context){
 	for _,locker:=range locker_list{
 		temp:=GetLockerResponse{
 			ID:locker.ID,
+			Coord: locker.Coord,
 		}
 		if locker.Start.Valid{
 			temp.Start=locker.Start.Time.Format("2006-01-02 15:04:05")
@@ -137,8 +137,8 @@ func (server *Server) getUserLocker(ctx *gin.Context){
 }
 
 type makePaymentParam struct{
-	LockerID int64 `form:"locker_id" binding:"required"`
-	PaymentMethod string `form:"method" binding:"required"`
+	LockerID int64 `json:"locker_id" form:"locker_id" binding:"required"`
+	PaymentMethod string `json:"method" form:"method"`
 }
 func (server *Server) makePayment(ctx *gin.Context){
 	var req makePaymentParam
@@ -210,8 +210,41 @@ func (server *Server) updateImg(ctx *gin.Context){
 	})
 
 }
-
-	
+type GetUserResponse struct{
+	Name     string         `json:"name"`
+	Email    string         `json:"email"`
+	Password	string	`json:"password"`
+	Photo    string `json:"photo"`
+}
+func (server *Server) getUser(ctx *gin.Context){
+	user_email:=ctx.GetString("user_info")
+	usr,err:=server.model.GetCustomerByEmail(ctx,user_email)
+	if err!=nil{
+		ctx.JSON(http.StatusBadRequest,handleError(err))
+		return
+	}
+	res:=GetUserResponse{
+		Name: usr.Name,
+		Email: usr.Email,
+		Password: usr.Password,
+		Photo: usr.Photo.String,
+	}	
+	ctx.JSON(http.StatusOK,res)
+}
+func (server *Server) getUserPayment(ctx *gin.Context){
+	user_email:=ctx.GetString("user_info")
+	usr,err:=server.model.GetCustomerByEmail(ctx,user_email)
+	if err!=nil{
+		ctx.JSON(http.StatusBadRequest,handleError(err))
+		return
+	}
+	rental,err:=server.model.GetCabinetRentalByUser(ctx,usr.ID)
+	if err!=nil{
+		ctx.JSON(http.StatusBadRequest,handleError(err))
+		return
+	}
+	ctx.JSON(http.StatusOK,rental)
+}
 // 	//write to destination, for testing purpose
 // 	dest,_:=os.Create("./static/temp/temp.png")
 // 	_,err=dest.Write(buffer)
