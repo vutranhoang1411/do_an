@@ -22,7 +22,7 @@ import serial.tools.list_ports
 #         print(strPort)
 
 
-ser = serial.Serial(port="/dev/pts/3", baudrate=115200)
+ser = serial.Serial(port="/dev/ttyUSB0", baudrate=115200)
 mess = ""
 
 def preProcessData(data:str)->str:
@@ -44,11 +44,12 @@ def processData(client,data):
     dev_id=splitData[0]
     payload=splitData[1]
 
-    if dev_id=="0":
+    
+    if dev_id=="1":
         client.publish("doan.locker1",payload)
-    elif dev_id=="1":
-        client.publish("doan.locker2",payload)
     elif dev_id=="2":
+        client.publish("doan.locker2",payload)
+    elif dev_id=="3":
         client.publish("doan.locker3",payload)
 
 def readSerial(client):

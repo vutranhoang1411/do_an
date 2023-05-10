@@ -3,6 +3,6 @@ requirement.txt
 test_opencv/
 */__pycache__
 backend/app.env
-test_faceregco/
+test_faceregco
 api.txt
-backend/public/img
+backend/public

@@ -1,0 +1,22 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "nvkhoan",
+            "database": "do_an",
+            "username": "nvkhoan"
+        },
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "new",
+            "database": "new",
+            "username": "nvkhoan"
+        }
+    ]
+}
