@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import CabinetLockerRentals,Cabinet
+from .models import CabinetLockerRentals,Cabinet, Customer
 admin.site.register(CabinetLockerRentals)
 admin.site.register(Cabinet)
+admin.site.register(Customer)
 # Register your models here.
